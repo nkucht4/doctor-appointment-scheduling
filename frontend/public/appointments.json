@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "date": "2025-12-22",
+    "time": "10:00",
+    "title": "Konsultacje dentystyczne",
+    "location": "Gabinet 101",
+    "patient": "Jan Kowalski"
+  },
+  {
+    "id": 2,
+    "date": "2025-12-22",
+    "time": "10:30",
+    "title": "Konsultacje ortopedyczne",
+    "location": "Gabinet 103",
+    "patient": "Bbb Aaa"
+  },
+  {
+    "id": 3,
+    "date": "2025-12-24",
+    "time": "13:00",
+    "title": "Konsultacje dentystyczne",
+    "location": "Gabinet 101",
+    "patient": "Anna Kowalska"
+  },
+  {
+    "id": 4,
+    "date": "2025-12-26",
+    "time": "15:30",
+    "title": "Konsultacje rodzinne",
+    "location": "Gabinet 101",
+    "patient": "Jan Kowalski"
+  },
+  {
+    "id": 5,
+    "date": "2025-12-26",
+    "time": "10:30",
+    "title": "Konsultacje rodzinne",
+    "location": "Gabinet 14",
+    "patient": "Bob Budowniczy"
+  }
+]

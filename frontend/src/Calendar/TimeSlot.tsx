@@ -3,14 +3,41 @@ import { useState } from "react";
 export default function TimeSlot(props) {
     const [showDetails, setShowDetails] = useState(false);
 
+    const isEmptyClickable =
+        !props.reservation &&
+        !props.isAbsent &&
+        props.isAvailable &&
+        !props.hasPassed;
+
     const handleClick = () => {
         if (props.reservation){
             setShowDetails(p=>!p);
         }
+        else if (isEmptyClickable){
+            props.handleChange({time : props.time, date : props.date});
+        }
     }
 
+    const TYPE_LABELS = {
+    first: "Pierwsza wizyta",
+    control: "Wizyta kontrolna",
+    recepta: "Recepta"
+    }
+
+    const name = props.reservation
+    ? TYPE_LABELS[props.reservation.title] : ""
+
     let className;
-    if (props.hasPassed && props.reservation){
+    if (props.isAbsent){
+        className="absent-highlight";
+    }
+    else if (!props.isAvailable && !props.isToday){
+        className="not-available-highlight";
+    }
+    else if (!props.isAvailable && props.isToday){
+        className="not-available-today-highlight";
+    }
+    else if (props.hasPassed && props.reservation){
         className="bg-secondary"
     }
     else if (props.isToday && !props.reservation)
@@ -21,21 +48,23 @@ export default function TimeSlot(props) {
     return (
         <td key={props.idx} 
         className={className}
-        onClick={handleClick}>
+        onClick={handleClick}
+        style={(isEmptyClickable || props.reservation) ? { cursor: "pointer" } : {}}
+        >
         <div className="h-100 w-100 d-flex">
         <div
             className={`flex-fill d-flex align-items-center justify-content-center flex-column`}
-            style={{ cursor: "pointer" }}
         >
         {props.reservation && (
             <small className="text-white fw-bold">
-            {props.reservation.title}
+            {name}
             </small>
         )}
         {showDetails &&
         <div className="text-white mt-1" style={{ fontSize: '0.8rem' }}>
             <div><strong>Pacjent:</strong> {props.reservation.patient}</div>
-            <div><strong>Miejsce:</strong> {props.reservation.location}</div>
+            <div><strong>Wiek pacjenta:</strong> {props.reservation.age}</div>
+            <div><strong>Notatki:</strong> {props.reservation.notes}</div>
         </div>
         }
         </div>

@@ -17,6 +17,7 @@ function DayHeader(props) {
 }
 
 export default function CalendarHeader(props){
+    const days = ["Pon", "Wt", "Śr", "Czw", "Pt", "Sob", "Nd"];
     const todayStr = formatDate(new Date());
 
     return (
@@ -29,7 +30,7 @@ export default function CalendarHeader(props){
                     <DayHeader
                     key={idx}
                     date={date}
-                    label={props.days[idx]}
+                    label={days[idx]}
                     isToday={dateStr === todayStr}
                     />
                 );

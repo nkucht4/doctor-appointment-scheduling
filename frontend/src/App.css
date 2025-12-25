@@ -3,3 +3,22 @@ td.today-highlight {
   color: white;
   font-weight: bold;
 }
+
+td.not-available-highlight {
+  background-color: #cac4c4 !important;
+  color: white;
+  font-weight: bold;
+}
+
+td.not-available-today-highlight{
+  background-color: #9dc5c8 !important;
+  color: white;
+  font-weight: bold;
+}
+
+
+td.absent-highlight{
+  background-color: #f79494 !important;
+  color: white;
+  font-weight: bold;
+}

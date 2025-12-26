@@ -4,7 +4,7 @@ import { AppointmentContext } from "../Providers/AppointmentProvider";
 import { AvailabilityContext } from "../Providers/AvailabilityProvider";
 
 export default function ConsultationForm(props) {
-    const { getAppointmentsForDay } = useContext(AppointmentContext);
+    const { getAppointmentsForDay, setEditFlag } = useContext(AppointmentContext);
     const { getAvailabilityForDay } = useContext(AvailabilityContext);
     const [ appointmentsToday, setAppointmentsToday ] = useState([]);
     const [ available, setAvailable ] = useState([]);
@@ -93,6 +93,7 @@ export default function ConsultationForm(props) {
 
         saveAppointment(form);
         props.onClose();
+        setEditFlag(p=>!p);
     };
 
 

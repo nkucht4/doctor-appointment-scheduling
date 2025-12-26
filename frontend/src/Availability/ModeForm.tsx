@@ -1,6 +1,6 @@
 export default function ModeForm(props){
     return (
-        <div className="d-flex gap-4 mb-4">
+        <div className="d-flex gap-4 mb-2">
                 <div className="form-check">
                     <input
                     className="form-check-input"
@@ -10,7 +10,7 @@ export default function ModeForm(props){
                     id="mode-cyclic"
                     />
                     <label className="form-check-label" htmlFor="mode-cyclic">
-                    Cykliczna
+                    Zakres
                     </label>
                 </div>
 
@@ -23,7 +23,7 @@ export default function ModeForm(props){
                     id="mode-single"
                     />
                     <label className="form-check-label" htmlFor="mode-single">
-                    Jednorazowa
+                    Jednorazowe
                     </label>
                 </div>
                 </div>

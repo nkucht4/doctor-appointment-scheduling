@@ -2,14 +2,16 @@ import TimeSlot from "./TimeSlot";
 import { useState, useEffect, useContext } from "react";
 import ConsultationForm from "../Consultations/ConsultationForm";
 import { AppointmentContext } from "../Providers/AppointmentProvider";
+import { AvailabilityContext } from "../Providers/AvailabilityProvider";
 
 export default function CalendarBody(props){
     const [ startHour, setStartHour ] = useState(10);
     const [ endHour, setEndHour ] = useState(16);
-    const [ availability, setAvailability ] = useState([]);
+    const [ availabilityDays, setAvailabilityDays ] = useState([]);
     const [ absenceDays, setAbsenceDays ] = useState([]);
     const [ showNewAppointment, setShowNewAppointment] = useState(false);
     const [ selectedSlot, setSelectedSlot ] = useState({ time: "", date: ""});
+    const { absence, availability } = useContext(AvailabilityContext);
 
     const timeToMinutes = (timeStr) => {
         const [h, m] = timeStr.split(":").map(Number);
@@ -28,29 +30,22 @@ export default function CalendarBody(props){
     useEffect(()=>{
         const weekDateStrings = props.weekDates.map(formatDate);
 
-        fetch("http://localhost:3000/absences").
-        then((res)=>res.json())
-        .then((absences)=>{
-            const filtered_absence = absences.filter(({ date_from, date_to }) => {
-            return weekDateStrings.some(
-                (d) => d >= date_from && d <= date_to
-            );
-            });
+       
+        const filtered_absence = absence.filter(({ date_from, date_to }) => {
+        return weekDateStrings.some(
+            (d) => d >= date_from && d <= date_to
+        );
+        });
 
-            setAbsenceDays(filtered_absence);
-            
-        })
+        setAbsenceDays(filtered_absence);
 
-        fetch("http://localhost:3000/availability")
-        .then((res) => res.json())
-        .then((availabilities) => {
-            const filtered = availabilities.filter(({ date_from, date_to }) => {
-            return weekDateStrings.some(
-                (d) => d >= date_from && d <= date_to
-            );
-            });
+        const filtered = availability.filter(({ date_from, date_to }) => {
+        return weekDateStrings.some(
+            (d) => d >= date_from && d <= date_to
+        );
+        });
 
-        setAvailability(filtered);
+        setAvailabilityDays(filtered);
         
         if (filtered.length === 0) {
           setStartHour(10);
@@ -71,8 +66,8 @@ export default function CalendarBody(props){
 
             setStartHour(Math.floor(earliest / 60));
             setEndHour(Math.ceil(latest / 60));
-        });
-    }, [props.weekDates]);
+        
+    }, [props.weekDates, availability, absence]);
 
     const generateTimeSlots = (intervalMinutes = 30) => {
         const slots = [];

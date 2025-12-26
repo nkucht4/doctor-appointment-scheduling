@@ -1,0 +1,37 @@
+import WeeklyCalendar from "../Calendar/WeeklyCalendar";
+import AvailabilityForm from "../Availability/AvailabilityForm";
+import AbsenceForm from "../Availability/AbsenceForm";
+import { useState } from "react";
+
+export default function CalendarView(){
+    const [showPanel, setShowPanel] = useState(false);
+
+    return (
+        <div className="container-fluid">
+
+            <div className="d-flex justify-content-end mb-2 p-2">
+                <button
+                    className="btn btn-link p-0 text-secondary text-decoration-none"
+                    onClick={() => setShowPanel(v => !v)}
+                >
+                    {showPanel ? "Ukryj edycję kalendarza" : "Edytyj kalendarz"}
+                </button>
+            </div>
+
+            <div className="row g-3">
+                <div className={`col-12 ${showPanel ? "col-lg-9" : "col-lg-12"}`}>
+                    <WeeklyCalendar initialDate={new Date()} />
+                </div>
+
+                {showPanel && (
+                    <div className="col-12 col-lg-3">
+                        <div className="card p-4 gap-3">
+                            <AvailabilityForm />
+                            <AbsenceForm />
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    )
+}

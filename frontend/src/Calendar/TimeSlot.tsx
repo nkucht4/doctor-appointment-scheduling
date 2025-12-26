@@ -24,6 +24,12 @@ export default function TimeSlot(props) {
     recepta: "Recepta"
     }
 
+    const COLORS = {
+        first: "bg-info",
+        control: "bg-primary",
+        recepta: "bg-danger"
+    }
+
     const name = props.reservation
     ? TYPE_LABELS[props.reservation.title] : ""
 
@@ -43,7 +49,7 @@ export default function TimeSlot(props) {
     else if (props.isToday && !props.reservation)
         className="today-highlight";
     else if (props.reservation)
-        className="bg-info";
+        className=COLORS[props.reservation.title]
 
     const handleCancel = () => {
         //setShowDetails(false);

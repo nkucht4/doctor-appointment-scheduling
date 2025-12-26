@@ -3,6 +3,7 @@ import { createContext, useEffect, useState } from "react";
 export const AppointmentContext = createContext();
 
 export default function AppointmentProvider({ children }){
+    const [editFlag, setEditFlag] = useState(false);
     const [appointments, setAppointments] = useState([]);
 
     const formatDate = (date) => {
@@ -17,7 +18,7 @@ export default function AppointmentProvider({ children }){
         .then(a => a.json())
         .then(a => setAppointments(a));
 
-    }, []);
+    }, [editFlag]);
 
     const getAppointmentsForWeek = (weekDates) => {
         const weekSet = new Set(weekDates.map(d => formatDate(d)));
@@ -29,7 +30,7 @@ export default function AppointmentProvider({ children }){
     };
 
     return (
-        <AppointmentContext.Provider value={{ appointments, getAppointmentsForWeek, formatDate, getAppointmentsForDay}}>
+        <AppointmentContext.Provider value={{ appointments, getAppointmentsForWeek, formatDate, getAppointmentsForDay, setEditFlag}}>
             {children}
         </AppointmentContext.Provider>
     );

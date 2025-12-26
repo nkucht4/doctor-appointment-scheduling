@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import CyclicForm from "./CyclicForm";
 import SingleDayForm from "./SingleDayForm";
 import HourAvailabilityForm from "./HourAvailabilityForm";
 import ModeForm from "./ModeForm";
 import {saveAvailability} from "../consultationServices"
+import { AvailabilityContext } from "../Providers/AvailabilityProvider";
 
 const DAYS = [
 { key: 1, label: "Pon" },
@@ -16,6 +17,7 @@ const DAYS = [
 ];
 
 export default function AvailabilityForm(props){
+    const { setEditFlag } = useContext(AvailabilityContext);
     const [mode, setMode] = useState("cyclic");
 
     const [dateRange, setDateRange] = useState({ from: "", to: "" });
@@ -49,11 +51,12 @@ export default function AvailabilityForm(props){
             "day_mask": daysMask
         };
         saveAvailability(availability);
+        setEditFlag(p=>!p);
     }
 
     return (
-            <div className="card p-4">
-                
+            <div className="d-flex gap-1 flex-column">
+                <h5 class="card-title">Dodaj godziny dostępnosci</h5>
                 <ModeForm 
                 mode={mode}
                 setMode={setMode}/>
@@ -81,7 +84,7 @@ export default function AvailabilityForm(props){
                 addTimeRange={addTimeRange}
                 />
 
-                <div className="mt-4">
+                <div >
                 <button
                     type="button"
                     className="btn btn-dark px-4"

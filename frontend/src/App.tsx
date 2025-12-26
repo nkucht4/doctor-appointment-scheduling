@@ -2,23 +2,28 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-import WeeklyCalendar from './Calendar/WeeklyCalendar'
-import AvailabilityForm from './Availability/AvailabilityForm'
-import AbsenceForm from './Availability/AbsenceForm'
-import ConsultationForm from './Consultations/ConsultationForm'
+import CalendarView from './Views/CalendarView'
 import AppointmentProvider from './Providers/AppointmentProvider'
 import AvailabilityProvider from './Providers/AvailabilityProvider'
 import ConsultationList from './Consultations/ConsultationList'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Layout from './Views/Layout'
 
 function App() {
   return (
     <>
     <AppointmentProvider>
       <AvailabilityProvider>
-      {<WeeklyCalendar initialDate={new Date()}/>}
-      {/*<ConsultationList/>*/}
-      {/*<AvailabilityForm />*/}
-      {/*<AbsenceForm/>*/}
+      
+        <BrowserRouter>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<CalendarView/>}/>
+              <Route path="/consultation_list" element={<ConsultationList/>}/>
+            </Route>
+          </Routes>
+        </BrowserRouter>
+
       </AvailabilityProvider>
     </AppointmentProvider>
     </>

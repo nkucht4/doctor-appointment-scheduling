@@ -3,7 +3,9 @@ import { createContext, useEffect, useState } from "react";
 export const AvailabilityContext = createContext();
 
 export default function AvailabilityProvider({ children }){
+    const [editFlag, setEditFlag] = useState(false);
     const [availability, setvAvailability] = useState([]);
+    const [ absence, setAbsence ] = useState([]);
 
     const formatDate = (date) => {
         const year = date.getFullYear();
@@ -17,7 +19,11 @@ export default function AvailabilityProvider({ children }){
         .then(a => a.json())
         .then(a => setvAvailability(a));
 
-    }, []);
+    fetch("http://localhost:3000/absences")
+        .then((res)=>res.json())
+        .then(a => setAbsence(a));
+
+    }, [editFlag]);
 
     const getAvailabilityForWeek = (weekDates) => {
          availability.filter(({ date_from, date_to }) => {
@@ -51,7 +57,7 @@ export default function AvailabilityProvider({ children }){
         };
 
     return (
-        <AvailabilityContext.Provider value={{ availability, getAvailabilityForWeek, getAvailabilityForDay}}>
+        <AvailabilityContext.Provider value={{ availability, getAvailabilityForWeek, getAvailabilityForDay, setEditFlag, absence}}>
             {children}
         </AvailabilityContext.Provider>
     );

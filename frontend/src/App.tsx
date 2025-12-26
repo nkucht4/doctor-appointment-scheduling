@@ -7,14 +7,19 @@ import AvailabilityForm from './Availability/AvailabilityForm'
 import AbsenceForm from './Availability/AbsenceForm'
 import ConsultationForm from './Consultations/ConsultationForm'
 import AppointmentProvider from './Providers/AppointmentProvider'
+import AvailabilityProvider from './Providers/AvailabilityProvider'
+import ConsultationList from './Consultations/ConsultationList'
 
 function App() {
   return (
     <>
     <AppointmentProvider>
+      <AvailabilityProvider>
       {<WeeklyCalendar initialDate={new Date()}/>}
+      {/*<ConsultationList/>*/}
       {/*<AvailabilityForm />*/}
       {/*<AbsenceForm/>*/}
+      </AvailabilityProvider>
     </AppointmentProvider>
     </>
   )

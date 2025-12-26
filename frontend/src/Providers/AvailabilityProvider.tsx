@@ -15,22 +15,44 @@ export default function AvailabilityProvider({ children }){
     useEffect(() => {
     fetch("http://localhost:3000/availability")
         .then(a => a.json())
-        .then(a => setAppointments(a));
+        .then(a => setvAvailability(a));
 
     }, []);
 
-    const getAppointmentsForWeek = (weekDates) => {
-        const weekSet = new Set(weekDates.map(d => formatDate(d)));
-        return appointments.filter(a => weekSet.has(a.date));
+    const getAvailabilityForWeek = (weekDates) => {
+         availability.filter(({ date_from, date_to }) => {
+            return weekDateStrings.some(
+                (d) => d >= date_from && d <= date_to
+            );})
     };
 
-    const getAppointmentsForDay = (date) => {
-        return appointments.filter(a => a.date === date);
-    };
+    const normalizeDate = (date) =>
+    date instanceof Date ? formatDate(date) : date;
+
+    const getAvailabilityForDay = (date) => {
+        const dayStr = normalizeDate(date);
+        const dayIndex =
+            date instanceof Date
+                ? date.getDay()
+                : new Date(dayStr).getDay();
+
+        return availability
+            .filter(({ date_from, date_to, day_mask }) => {
+                if (dayStr < date_from || dayStr > date_to) return false;
+                if (!day_mask || day_mask.length === 0) return true;
+                return day_mask.includes(dayIndex);
+            })
+            .flatMap(({ times }) =>
+                times.map(t => ({
+                    start_hour: t.from,
+                    end_hour: t.to
+                }))
+            );
+        };
 
     return (
-        <AppointmentContext.Provider value={{ appointments, getAppointmentsForWeek, formatDate, getAppointmentsForDay}}>
+        <AvailabilityContext.Provider value={{ availability, getAvailabilityForWeek, getAvailabilityForDay}}>
             {children}
-        </AppointmentContext.Provider>
+        </AvailabilityContext.Provider>
     );
 }

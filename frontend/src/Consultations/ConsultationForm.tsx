@@ -1,15 +1,17 @@
 import { useState, useContext, useEffect } from "react";
 import { saveAppointment } from "../consultationServices";
 import { AppointmentContext } from "../Providers/AppointmentProvider";
+import { AvailabilityContext } from "../Providers/AvailabilityProvider";
 
 export default function ConsultationForm(props) {
     const { getAppointmentsForDay } = useContext(AppointmentContext);
+    const { getAvailabilityForDay } = useContext(AvailabilityContext);
     const [ appointmentsToday, setAppointmentsToday ] = useState([]);
     const [ available, setAvailable ] = useState([]);
 
     useEffect(()=>{
         setAppointmentsToday(getAppointmentsForDay(props.selectedSlot.date));
-
+        setAvailable(getAvailabilityForDay(props.selectedSlot.date))
     
     }, []);
 
@@ -51,6 +53,19 @@ export default function ConsultationForm(props) {
         });
     };
 
+    const isWithinAvailability = () => {
+        if (!form.duration || !form.time) return false; 
+
+        const newStart = timeToMinutes(form.time);
+        const newEnd = newStart + Number(form.duration);
+
+        return available.some(({ start_hour, end_hour }) => {
+            const availableStart = timeToMinutes(start_hour);
+            const availableEnd = timeToMinutes(end_hour);
+            return newStart >= availableStart && newEnd <= availableEnd;
+        });
+    };
+
     const validate = () => {
         const newErrors = {};
 
@@ -62,7 +77,10 @@ export default function ConsultationForm(props) {
             newErrors.age = "Podaj poprawny wiek";
 
         if (form.duration && hasOverlap()) {
-            newErrors.duration = "Termin koliduje z inną konsultacją";
+            newErrors.duration = "Termin koliduje z inną konsultacją";}
+
+        if (form.duration && !isWithinAvailability()) {
+            newErrors.duration = "Termin jest poza dostępnymi godzinami";
         }
 
         setErrors(newErrors);
@@ -70,7 +88,7 @@ export default function ConsultationForm(props) {
     };
 
     const handleSubmit = (e) => {
-        //e.preventDefault();
+        e.preventDefault();
         if (!validate()) return;
 
         saveAppointment(form);

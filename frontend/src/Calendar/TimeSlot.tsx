@@ -45,10 +45,15 @@ export default function TimeSlot(props) {
     else if (props.reservation)
         className="bg-info";
 
+    const handleCancel = () => {
+        //setShowDetails(false);
+    }
+
     return (
         <td key={props.idx} 
         className={className}
         onClick={handleClick}
+        rowSpan={props.rowSpan || 1} 
         style={(isEmptyClickable || props.reservation) ? { cursor: "pointer" } : {}}
         >
         <div className="h-100 w-100 d-flex">
@@ -65,6 +70,12 @@ export default function TimeSlot(props) {
             <div><strong>Pacjent:</strong> {props.reservation.patient}</div>
             <div><strong>Wiek pacjenta:</strong> {props.reservation.age}</div>
             <div><strong>Notatki:</strong> {props.reservation.notes}</div>
+
+            <button
+            type="button"
+            className="btn btn-link p-0"
+            onClick={handleCancel}
+            >Odwołaj wizytę</button>
         </div>
         }
         </div>

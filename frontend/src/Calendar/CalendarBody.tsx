@@ -102,12 +102,12 @@ export default function CalendarBody(props){
         return dt;
     }
 
-    const findAppointmentForSlot = (date, time) =>{
+    const findAppointmentStartForSlot = (date, time) => {
         const day = formatDate(date);
         return props.appointments.find(
             a => a.date === day && a.time === time
         );
-    }
+    };
 
     const isCurrentTimeSlot = (timeStr, intervalMinutes = 30) => {
         const [hour, minute] = timeStr.split(":").map(Number);
@@ -131,6 +131,19 @@ export default function CalendarBody(props){
         });
     };
 
+    const isSlotCoveredByAppointment = (dateStr, timeStr, appointments) => {
+    const timeMins = timeToMinutes(timeStr);
+
+    return appointments.some(appt => {
+        if (appt.date !== dateStr) return false;
+
+        const apptStart = timeToMinutes(appt.time);
+        const apptEnd = apptStart + Number(appt.duration);
+
+        return timeMins > apptStart && timeMins < apptEnd;
+    });
+    };
+
     return (
         <>
         <tbody>
@@ -141,6 +154,15 @@ export default function CalendarBody(props){
                 const slotDateTime = getDateTime(date, time);
                 const hasPassed = slotDateTime < now;
                 const dayStr = formatDate(date);
+
+                const appointmentStart = findAppointmentStartForSlot(date, time);
+                const isCovered = isSlotCoveredByAppointment(dayStr, time, props.appointments);
+
+                if (!appointmentStart && isCovered) {
+                return null;
+                }
+
+                const rowSpan = appointmentStart ? appointmentStart.duration / 30 : 1;
                 
                 const dayAvailability = availability.find(({ date_from, date_to, day_mask }) => {
                     if (!(dayStr >= date_from && dayStr <= date_to)) return false;
@@ -162,11 +184,12 @@ export default function CalendarBody(props){
                     key={idx}
                     date={formatDate(date)}
                     time={time}
-                    reservation={findAppointmentForSlot(date, time)}
+                    reservation={findAppointmentStartForSlot(date, time)}
                     isToday={todayStr === formatDate(date)}
                     hasPassed={hasPassed}
                     isAvailable={isAvailable}
                     isAbsent={isAbsent}
+                    rowSpan={rowSpan}
                     handleChange={(x)=>{setSelectedSlot(x);
                         setShowNewAppointment(true);
                     }}

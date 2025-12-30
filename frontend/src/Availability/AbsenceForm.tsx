@@ -11,12 +11,32 @@ export default function AbsenceForm(){
     const [dateRange, setDateRange] = useState({ from: "", to: "" });
     const [singleDate, setSingleDate] = useState("");
 
-    const onSubmit = () => {
+    const onSubmit = async () => {
             const availability = {
+                "doctor_id": "6952741d9101f21909714fc3",
                 "date_from": singleDate ? singleDate : dateRange["from"],
                 "date_to": singleDate ? singleDate : dateRange["to"],
             };
-            saveAbsence(availability);
+            
+            try {
+                const response = await fetch("http://localhost:8080/absence", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(availability)
+            });
+
+             if (!response.ok) {
+                const text = await response.text();
+                throw new Error(text);
+            }
+
+            }
+            catch (error) {
+                console.error("Error:", error.message);
+            }
+
             setEditFlag(p=>!p);
     }
 

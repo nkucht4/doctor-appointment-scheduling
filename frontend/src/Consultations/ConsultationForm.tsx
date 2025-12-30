@@ -87,11 +87,22 @@ export default function ConsultationForm(props) {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validate()) return;
 
-        saveAppointment(form);
+        //saveAppointment(form);
+        try {
+            const response = await fetch("http://localhost:8080/appointment", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(form)
+            });
+        } catch (error) {
+            console.error("Error:", error.message);
+        }
         props.onClose();
         setEditFlag(p=>!p);
     };

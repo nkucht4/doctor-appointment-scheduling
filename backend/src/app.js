@@ -6,7 +6,7 @@ const appointmentRoutes = require("./routes/AppointmentRouter");
 const connectDB = require("./db");
 
 const app = express();
-var corsOptions = { origin: "http://localhost:8081" };
+var corsOptions = { origin: "http://localhost:5173" };
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

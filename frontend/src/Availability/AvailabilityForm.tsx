@@ -43,14 +43,25 @@ export default function AvailabilityForm(props){
         setTimeRanges([...timeRanges, { from: "", to: "" }]);
     }
 
-    const onSubmit = () => {
+    const onSubmit = async () => {
         const availability = {
+            "doctor_id": "6952741d9101f21909714fc3",
             "date_from": singleDate ? singleDate : dateRange["from"],
             "date_to": singleDate ? singleDate : dateRange["to"],
             "times": timeRanges,
             "day_mask": daysMask
         };
-        saveAvailability(availability);
+        try {
+            const response = await fetch("http://localhost:8080/availability", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(availability)
+        })}
+        catch (error) {
+            console.error("Error:", error.message);
+        }
         setEditFlag(p=>!p);
     }
 

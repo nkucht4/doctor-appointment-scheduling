@@ -14,11 +14,21 @@ export default function AppointmentProvider({ children }){
     };
 
     useEffect(() => {
-    fetch("http://localhost:3000/appointments")
+    fetch("http://localhost:8080/appointment")
         .then(a => a.json())
-        .then(a => setAppointments(a));
+        .then(a=>setAppointments(a.map(x=>{return {...x, date:formatDate(new Date(x.date))}})));
+        //.then(a => setAppointments(a.map(x=>{return {...x, date_from: formatDate(new Date(x.date_from)), 
+        //        date_to: formatDate(new Date(x.date_to))}})));
 
     }, [editFlag]);
+
+    useEffect(()=>{
+        console.log(appointments);
+    }, [appointments]);
+
+    useEffect(()=>{
+        console.log(appointments);
+    }, [appointments]);
 
     const getAppointmentsForWeek = (weekDates) => {
         const weekSet = new Set(weekDates.map(d => formatDate(d)));

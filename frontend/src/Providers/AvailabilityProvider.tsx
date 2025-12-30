@@ -15,13 +15,17 @@ export default function AvailabilityProvider({ children }){
     };
 
     useEffect(() => {
-    fetch("http://localhost:3000/availability")
+    fetch("http://localhost:8080/availability")
         .then(a => a.json())
-        .then(a => setvAvailability(a));
+        .then(a => setvAvailability(a.map(x=>{return{...x, date_from: formatDate(new Date(x.date_from)),
+            date_to: formatDate(new Date(x.date_to))
+        }})));
 
-    fetch("http://localhost:3000/absences")
+    fetch("http://localhost:8080/absence")
         .then((res)=>res.json())
-        .then(a => setAbsence(a));
+        .then(a => setAbsence(a.map(x=>{return{...x, date_from: formatDate(new Date(x.date_from)),
+            date_to: formatDate(new Date(x.date_to))
+        }})));
 
     }, [editFlag]);
 

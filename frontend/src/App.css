@@ -22,3 +22,9 @@ td.absent-highlight{
   color: white;
   font-weight: bold;
 }
+
+td.absent-today{
+  background-color: #e9889a !important;
+  color: white;
+  font-weight: bold;
+}

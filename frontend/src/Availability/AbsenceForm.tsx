@@ -4,12 +4,14 @@ import SingleDayForm from "./SingleDayForm";
 import ModeForm from "./ModeForm";
 import { saveAbsence } from "../consultationServices";
 import { AvailabilityContext } from "../Providers/AvailabilityProvider";
+import { AuthContext } from "../Providers/AuthProvider";
 
 export default function AbsenceForm(){
     const [mode, setMode] = useState("cyclic");
     const { setEditFlag } = useContext(AvailabilityContext);
     const [dateRange, setDateRange] = useState({ from: "", to: "" });
     const [singleDate, setSingleDate] = useState("");
+    const { token } = useContext(AuthContext);
 
     const onSubmit = async () => {
             const availability = {
@@ -22,6 +24,7 @@ export default function AbsenceForm(){
                 const response = await fetch("http://localhost:8080/absence", {
                 method: "POST",
                 headers: {
+                    Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(availability)

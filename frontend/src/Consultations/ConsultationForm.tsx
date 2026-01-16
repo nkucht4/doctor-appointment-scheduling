@@ -2,12 +2,14 @@ import { useState, useContext, useEffect } from "react";
 import { saveAppointment } from "../consultationServices";
 import { AppointmentContext } from "../Providers/AppointmentProvider";
 import { AvailabilityContext } from "../Providers/AvailabilityProvider";
+import { AuthContext } from "../Providers/AuthProvider";
 
 export default function ConsultationForm(props) {
     const { getAppointmentsForDay, setEditFlag } = useContext(AppointmentContext);
     const { getAvailabilityForDay } = useContext(AvailabilityContext);
     const [ appointmentsToday, setAppointmentsToday ] = useState([]);
     const [ available, setAvailable ] = useState([]);
+    const { token } = useContext(AuthContext);
 
     useEffect(()=>{
         setAppointmentsToday(getAppointmentsForDay(props.selectedSlot.date));
@@ -29,11 +31,18 @@ export default function ConsultationForm(props) {
     const [errors, setErrors] = useState({});
 
     const handleChange = (e) => {
-        const { name, value/*, files */} = e.target;
-        setForm({
+        const { name, value, files } = e.target;
+        if (files) {
+            setForm({
             ...form,
-            [name]: /*files ? files : */value,
-        });
+            [name]: files[0], 
+            });
+        } else {
+            setForm({
+            ...form,
+            [name]: value,
+            });
+        }
     };
 
     const timeToMinutes = (timeStr) => {
@@ -93,13 +102,24 @@ export default function ConsultationForm(props) {
 
         //saveAppointment(form);
         try {
+            const formData = new FormData();
+            for (const key in form) {
+            if (form.hasOwnProperty(key)) {
+                formData.append(key, form[key]);
+            }
+            }
+
             const response = await fetch("http://localhost:8080/appointment", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(form)
+            body: formData,           
             });
+
+            if (!response.ok) {
+            throw new Error(`Server error: ${response.statusText}`);
+            }
         } catch (error) {
             console.error("Error:", error.message);
         }
@@ -192,17 +212,17 @@ export default function ConsultationForm(props) {
                 />
             </div>
 
-            {/*<div className="mb-3">
+            <div className="mb-3">
                 <label className="form-label">Dokumenty (opcjonalnie)</label>
                 <input
                     type="file"
                     className="form-control"
-                    name="files"
+                    name="file"
                     multiple
                     accept=".pdf,.jpg,.png"
                     onChange={handleChange}
                 />
-            </div>*/}
+            </div>
 
             <button type="submit" className="btn btn-primary">
                 Wyślij

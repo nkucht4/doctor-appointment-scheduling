@@ -5,6 +5,7 @@ import HourAvailabilityForm from "./HourAvailabilityForm";
 import ModeForm from "./ModeForm";
 import {saveAvailability} from "../consultationServices"
 import { AvailabilityContext } from "../Providers/AvailabilityProvider";
+import { AuthContext } from "../Providers/AuthProvider";
 
 const DAYS = [
 { key: 1, label: "Pon" },
@@ -23,6 +24,7 @@ export default function AvailabilityForm(props){
     const [dateRange, setDateRange] = useState({ from: "", to: "" });
     const [singleDate, setSingleDate] = useState("");
     const [daysMask, setDaysMask] = useState([]);
+    const { token } = useContext(AuthContext);
     const [timeRanges, setTimeRanges] = useState([
     { from: "10:00", to: "16:00" },
     ]);
@@ -55,6 +57,7 @@ export default function AvailabilityForm(props){
             const response = await fetch("http://localhost:8080/availability", {
             method: "POST",
             headers: {
+                Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(availability)

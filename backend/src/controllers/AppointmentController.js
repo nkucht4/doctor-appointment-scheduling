@@ -1,8 +1,16 @@
 const Appointment = require("../models/AppointmentModel");
 
+
 exports.createAppointment = async (req, res) => {
   try {
     const appointmentData = req.body;
+
+    if (req.file) {
+      appointmentData.file = {
+        data: req.file.buffer,
+        contentType: req.file.mimetype
+      };
+    }
 
     const appointment = new Appointment(appointmentData);
     await appointment.save();
@@ -60,5 +68,21 @@ exports.deleteAppointment = async (req, res) => {
     res.status(200).json({ message: "Appointments deleted" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting appointment", error: error.message });
+  }
+};
+
+exports.getAppointmentFile = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const appointment = await Appointment.findById(id);
+
+    if (!appointment || !appointment.file || !appointment.file.data) {
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    res.set("Content-Type", appointment.file.contentType);
+    res.send(appointment.file.data);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching file", error: error.message });
   }
 };

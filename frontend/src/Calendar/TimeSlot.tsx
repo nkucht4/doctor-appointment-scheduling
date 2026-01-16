@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { AppointmentContext } from "../Providers/AppointmentProvider";
+import { AuthContext } from "../Providers/AuthProvider";
 
 export default function TimeSlot(props) {
     const [showDetails, setShowDetails] = useState(false);
+    const { setEditFlag } = useContext(AppointmentContext);
+    const { token } = useContext(AuthContext);
 
     const isEmptyClickable =
         !props.reservation &&
@@ -34,7 +38,10 @@ export default function TimeSlot(props) {
     ? TYPE_LABELS[props.reservation.title] : ""
 
     let className;
-    if (props.isAbsent){
+    if (props.isAbsent && props.isToday){
+        className="absent-today";
+    }
+    else if (props.isAbsent && !props.isToday){
         className="absent-highlight";
     }
     else if (!props.isAvailable && !props.isToday){
@@ -51,9 +58,70 @@ export default function TimeSlot(props) {
     else if (props.reservation)
         className=COLORS[props.reservation.title]
 
-    const handleCancel = () => {
-        //setShowDetails(false);
-    }
+    const handleCancel = async () => {
+        if (!props.reservation?._id) return;
+
+        try {
+        const response = await fetch(
+        `http://localhost:8080/appointment/${props.reservation._id}`,
+        { method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+         }
+        );
+
+        if (!response.ok) {
+        throw new Error("Failed to cancel appointment");
+        }
+
+        setEditFlag(p=>!p);
+        
+        } catch (error) {
+            console.error("Cancel error:", error.message);
+        }
+    };
+
+    const handleDownload = async () => {
+        if (!props.reservation?._id) return;
+
+        try {
+            const response = await fetch(`http://localhost:8080/appointment/${props.reservation._id}/file`, 
+                {headers: {
+                    Authorization: `Bearer ${token}`,
+                }}
+            );
+
+            if (!response.ok) {
+            throw new Error('Failed to download file');
+            }
+
+            const blob = await response.blob();
+
+            const contentType = response.headers.get('Content-Type') || 'application/octet-stream';
+            let extension = '';
+            if (contentType.includes('pdf')) extension = '.pdf';
+            else if (contentType.includes('jpeg') || contentType.includes('jpg')) extension = '.jpg';
+            else if (contentType.includes('png')) extension = '.png';
+
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+
+            a.download = `file${extension}`;
+
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+
+            window.URL.revokeObjectURL(url);
+
+        } catch (error) {
+            console.error('Download error:', error.message);
+        }
+        };
+
 
     return (
         <td key={props.idx} 
@@ -77,9 +145,16 @@ export default function TimeSlot(props) {
             <div><strong>Wiek pacjenta:</strong> {props.reservation.age}</div>
             <div><strong>Notatki:</strong> {props.reservation.notes}</div>
 
+            { props.reservation.file && <>
             <button
             type="button"
-            className="btn btn-link p-0"
+            className="btn btn-link p-0 text-light"
+            onClick={handleDownload}
+            >Pobierz plik</button> <br/> </>}
+
+            <button
+            type="button"
+            className="btn btn-link p-0 text-light"
             onClick={handleCancel}
             >Odwołaj wizytę</button>
         </div>

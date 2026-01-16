@@ -1,11 +1,14 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useContext } from "react";
+import { AuthContext } from "./AuthProvider";
 
 export const AvailabilityContext = createContext();
 
 export default function AvailabilityProvider({ children }){
     const [editFlag, setEditFlag] = useState(false);
+    const [editFlag2, setEditFlag2] = useState(false);
     const [availability, setvAvailability] = useState([]);
     const [ absence, setAbsence ] = useState([]);
+    const { token } = useContext(AuthContext);
 
     const formatDate = (date) => {
         const year = date.getFullYear();
@@ -15,19 +18,23 @@ export default function AvailabilityProvider({ children }){
     };
 
     useEffect(() => {
-    fetch("http://localhost:8080/availability")
+    fetch("http://localhost:8080/availability",
+        { headers: {
+            Authorization: `Bearer ${token}`
+        }}
+    )
         .then(a => a.json())
         .then(a => setvAvailability(a.map(x=>{return{...x, date_from: formatDate(new Date(x.date_from)),
             date_to: formatDate(new Date(x.date_to))
         }})));
 
-    fetch("http://localhost:8080/absence")
+    fetch("http://localhost:8080/absence", { headers: {Authorization: `Bearer ${token}`}})
         .then((res)=>res.json())
         .then(a => setAbsence(a.map(x=>{return{...x, date_from: formatDate(new Date(x.date_from)),
             date_to: formatDate(new Date(x.date_to))
         }})));
 
-    }, [editFlag]);
+    }, [editFlag, editFlag2, token]);
 
     const getAvailabilityForWeek = (weekDates) => {
          availability.filter(({ date_from, date_to }) => {
@@ -61,7 +68,7 @@ export default function AvailabilityProvider({ children }){
         };
 
     return (
-        <AvailabilityContext.Provider value={{ availability, getAvailabilityForWeek, getAvailabilityForDay, setEditFlag, absence}}>
+        <AvailabilityContext.Provider value={{ availability, getAvailabilityForWeek, getAvailabilityForDay, setEditFlag, setEditFlag2, absence}}>
             {children}
         </AvailabilityContext.Provider>
     );

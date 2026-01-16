@@ -54,6 +54,14 @@ const AppointmentSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    paid: {
+        type: Boolean,
+        default: false
+    },
+    file: {
+        data: Buffer,         
+        contentType: String  
+    }
 });
 
 module.exports = mongoose.model("Appointment", AppointmentSchema);

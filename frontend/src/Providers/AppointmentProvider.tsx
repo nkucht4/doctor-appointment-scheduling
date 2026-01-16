@@ -1,10 +1,12 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { AuthContext } from "./AuthProvider";
 
 export const AppointmentContext = createContext();
 
 export default function AppointmentProvider({ children }){
     const [editFlag, setEditFlag] = useState(false);
     const [appointments, setAppointments] = useState([]);
+    const { token } = useContext(AuthContext);
 
     const formatDate = (date) => {
         const year = date.getFullYear();
@@ -14,13 +16,16 @@ export default function AppointmentProvider({ children }){
     };
 
     useEffect(() => {
-    fetch("http://localhost:8080/appointment")
+    fetch("http://localhost:8080/appointment",
+        { headers: {
+            Authorization: `Bearer ${token}`}}
+    )
         .then(a => a.json())
         .then(a=>setAppointments(a.map(x=>{return {...x, date:formatDate(new Date(x.date))}})));
         //.then(a => setAppointments(a.map(x=>{return {...x, date_from: formatDate(new Date(x.date_from)), 
         //        date_to: formatDate(new Date(x.date_to))}})));
 
-    }, [editFlag]);
+    }, [editFlag, token]);
 
     useEffect(()=>{
         console.log(appointments);

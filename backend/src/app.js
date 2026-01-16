@@ -3,6 +3,7 @@ const cors = require("cors");
 const availabilityRoutes = require("./routes/AvailabilityRouter");
 const absenceRoutes = require("./routes/AbsenceRouter");
 const appointmentRoutes = require("./routes/AppointmentRouter");
+const authRoutes = require("./routes/AuthRouter")
 const connectDB = require("./db");
 
 const app = express();
@@ -16,6 +17,7 @@ connectDB();
 app.use("/availability", availabilityRoutes);
 app.use("/absence", absenceRoutes);
 app.use("/appointment", appointmentRoutes);
+app.use("/auth", authRoutes);
 
 const PORT = process.env.PORT || 8080; app.listen(PORT, () =>{
 console.log(`Server is running on port ${PORT}.`); })

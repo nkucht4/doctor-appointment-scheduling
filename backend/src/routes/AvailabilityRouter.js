@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const availabilityController = require("../controllers/AvailabilityController");
+const authenticateToken = require('../middleware/authMiddleware');
 
-router.post("/", availabilityController.createAvailability);
-router.get("/", availabilityController.getAvailabilities);
-router.put("/:id", availabilityController.updateAvailability);
-router.delete("/:id", availabilityController.deleteAvailability);
+router.post("/", authenticateToken, availabilityController.createAvailability);
+router.get("/", authenticateToken, availabilityController.getAvailabilities);
+router.put("/:id", authenticateToken, availabilityController.updateAvailability);
+router.delete("/:id", authenticateToken, availabilityController.deleteAvailability);
 
 module.exports = router;

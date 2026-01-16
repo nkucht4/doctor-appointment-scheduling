@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { AppointmentContext } from "../Providers/AppointmentProvider";
+import { AuthContext } from "../Providers/AuthProvider";
 
 export default function ConsultationListElement(props){
-    const [ paid, setPaid ] = useState(false);
+    const { setEditFlag } = useContext(AppointmentContext);
+    const { token } = useContext(AuthContext);
 
     const TYPE_LABELS = {
     first: "Pierwsza wizyta",
@@ -15,6 +18,25 @@ export default function ConsultationListElement(props){
     const reservation = props.reservation;
 
     if (!reservation) return null;
+
+    const handlePayment = async () => {
+        const res = await fetch(`http://localhost:8080/appointment/${reservation._id}`,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({...reservation, paid: true}),
+            }
+        );
+
+        if (!res.ok) {
+            throw new Error("Failed to update payment status");
+        }
+
+        setEditFlag(p=>!p);
+    };
 
     return (
         <div className="card mb-3 shadow-sm">
@@ -32,15 +54,12 @@ export default function ConsultationListElement(props){
                 </p>
                 )}
 
-                { !paid && ( <>
+                { !reservation.paid && ( <>
                 <div className="d-flex justify-content-end gap-2">
                 <button
                     type="button"
                     className="btn btn-outline-primary btn-sm"
-                    onClick={() => {alert("Zapłacono");
-                        setPaid(true);
-                    }
-                    }
+                    onClick={handlePayment}
                 >
                     Zapłać
                 </button>

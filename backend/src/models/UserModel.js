@@ -14,6 +14,11 @@ const userSchema = new Schema({
     trim: true,
     minlength: 1,
   },
+  specialization: {
+    type: String,
+    trim: true,
+    minlength: 1,
+  },
   email: {
     type: String,
     required: true,
@@ -27,6 +32,16 @@ const userSchema = new Schema({
     required: true,
     minlength: 6,
   },
+
+  role: {
+    type: String,
+    enum: ["PATIENT", "DOCTOR", "ADMIN"],
+    default: "PATIENT"
+  },
+
+  refreshToken: {
+  type: String
+}
 }, {
   timestamps: true,
 });

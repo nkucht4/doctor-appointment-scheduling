@@ -8,6 +8,10 @@ export default function PublicLayout() {
           Doctor Calendar
         </Link>
 
+        <Link className="navbar-brand" to="/doctors">
+              Lista lekarzy
+            </Link>
+
         <div className="ms-auto d-flex gap-3 align-items-center">
               <Link to="/login" className="nav-link">
                 Logowanie

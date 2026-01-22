@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
 
 type User = {
   firstName: string;
@@ -9,42 +10,125 @@ type User = {
 type AuthContextType = {
   token: string | null;
   user: User | null;
-  login: (token: string, user: User) => void;
+  login: (accessToken: string, user: User, refreshToken: string) => void;
   logout: () => void;
   isAuthenticated: boolean;
 };
 
+
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-export default function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem("token"));
-  const [user, setUser] = useState<User | null>(() => {
-    const savedUser = localStorage.getItem("user");
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
 
-  const login = (newToken: string, newUser: User) => {
-    localStorage.setItem("token", newToken);
-    localStorage.setItem("user", JSON.stringify(newUser));
-    setToken(newToken);
-    setUser(newUser);
+const storageFactory = (mode: string): Storage | null => {
+  if (mode === "local") return localStorage;
+  if (mode === "session") return sessionStorage;
+  return null; 
+};
+
+
+export default function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [storage, setStorage] = useState<Storage | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [initialized, setInitialized] = useState(false);
+
+
+  useEffect(() => {
+    const initAuth = async () => {
+      const res = await fetch("http://localhost:8080/auth_settings");
+      const data = await res.json();
+
+      const selectedStorage = storageFactory(data.persistenceMode);
+      setStorage(selectedStorage);
+
+      const savedToken = selectedStorage?.getItem("token") || null;
+      const savedUser = selectedStorage?.getItem("user");
+
+      setToken(savedToken);
+      setUser(savedUser ? JSON.parse(savedUser) : null);
+      setInitialized(true);
+    };
+
+    initAuth();
+  }, []);
+
+
+  const login = (accessToken: string, user: User, refreshToken: string) => {
+    if (storage) {
+      storage.setItem("token", accessToken);
+      storage.setItem("refreshToken", refreshToken);
+      storage.setItem("user", JSON.stringify(user));
+    }
+
+    setToken(accessToken);
+    setUser(user);
   };
 
+
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    storage?.removeItem("token");
+    storage?.removeItem("refreshToken");
+    storage?.removeItem("user");
+
     setToken(null);
     setUser(null);
   };
 
-  const isAuthenticated = !!token;
+
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      res => res,
+      async error => {
+        if (error.response?.status === 401) {
+          try {
+            const refreshToken = storage?.getItem("refreshToken");
+            if (!refreshToken) throw new Error("No refresh token");
+
+            const res = await axios.post("http://localhost:8080/auth//refresh_token", {
+              refreshToken
+            });
+
+            const newAccessToken = res.data.accessToken;
+
+            storage?.setItem("token", newAccessToken);
+            setToken(newAccessToken);
+
+            error.config.headers.Authorization = `Bearer ${newAccessToken}`;
+            return axios(error.config);
+          } catch {
+            logout();
+          }
+        }
+
+        if (error.response?.status === 403) {
+          logout(); 
+        }
+
+        return Promise.reject(error);
+      }
+    );
+
+    return () => axios.interceptors.response.eject(interceptor);
+  }, [storage]);
+
+
+  if (!initialized) return null; 
 
   return (
-    <AuthContext.Provider value={{ token, user, login, logout, isAuthenticated }}>
+    <AuthContext.Provider
+      value={{
+        token,
+        user,
+        login,
+        logout,
+        isAuthenticated: !!token
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
+
 
 export function useAuth() {
   const ctx = useContext(AuthContext);

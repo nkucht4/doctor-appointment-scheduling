@@ -40,7 +40,7 @@ export default function LoginForm() {
       }
       const data = await response.json();
 
-      login(data.token, data.user);
+      login(data.accessToken, data.user, data.refreshToken);
       setEditFlag(p=>!p);
       setEditFlag(p=>!p);
 

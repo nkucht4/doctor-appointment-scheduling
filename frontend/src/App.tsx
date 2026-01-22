@@ -13,6 +13,7 @@ import LoginForm from './User/LoginForm'
 import AuthProvider from './Providers/AuthProvider'
 import PublicLayout from './Views/PublicLayout'
 import ProtectedRoute from './ProtectedRoute'
+import DoctorList from './User/DoctorList'
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Routes>
             <Route element={<PublicLayout />}>
             <Route path="/login" element={<LoginForm />} />
+            <Route path="/doctors" element={<DoctorList/>}/>
             <Route path="/register" element={<RegisterForm />} />
           </Route>
 
@@ -34,6 +36,8 @@ function App() {
               <Route path="/consultation_list" element={<ConsultationList/>}/>
               <Route path="/register" element={<RegisterForm/>}/>
               <Route path="/login" element={<LoginForm/>}/>
+              <Route path="/doctors_harmonogram" element={<CalendarView/>}/>
+              <Route path="/doctors_harmonogram" element={<CalendarView/>}/>
             </Route>
             </Route>
           </Routes>

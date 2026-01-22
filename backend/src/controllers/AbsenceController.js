@@ -35,6 +35,25 @@ exports.getAbsenceById = async (req, res) => {
   }
 };
 
+exports.getAbsencesByDoctorId = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+
+    const absences = await Absence.find({ doctor_id: doctorId });
+
+    if (!absences.length) {
+      return res.status(404).json({ message: "No absences found for this doctor" });
+    }
+
+    res.status(200).json(absences);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching absences",
+      error: error.message
+    });
+  }
+};
+
 exports.updateAbsence = async (req, res) => {
   try {
     const id = req.params.id;

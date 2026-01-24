@@ -6,8 +6,8 @@ import { AvailabilityContext } from "../Providers/AvailabilityProvider";
 
 export default function LoginForm() {
   const navigate = useNavigate();
-  const { setEditFlag } = useContext(AppointmentContext);
-  const { setEditFlag2 } = useContext(AvailabilityContext);
+  const { setEditFlag, setDoctorCheck } = useContext(AppointmentContext);
+  const { setEditFlag2, setCheckDoc2 } = useContext(AvailabilityContext);
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -42,7 +42,9 @@ export default function LoginForm() {
 
       login(data.accessToken, data.user, data.refreshToken);
       setEditFlag(p=>!p);
-      setEditFlag(p=>!p);
+      setEditFlag2(p=>!p);
+      setDoctorCheck(p=>!p);
+      setCheckDoc2(p=>!p);
 
       navigate("/");
 

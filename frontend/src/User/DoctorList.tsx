@@ -11,10 +11,21 @@ export default function DoctorList(){
     }, [])
 
     return (
-        <div className="p-4">
-        {doctors.map((a)=>
-            <DoctorElement doctor={a}/>)}
+    <div className="container py-4">
+        <div className="d-flex flex-wrap gap-3 justify-content-center">
+        {Array.isArray(doctors) && doctors.length > 0 ? (
+            doctors.map((doctor, idx) => (
+            <div
+                key={doctor._id || idx}
+                style={{ flex: "0 0 30%", minWidth: "250px" }}
+            >
+                <DoctorElement doctor={doctor} />
+            </div>
+            ))
+        ) : (
+            <p className="text-center">Brak dostępnych doktorów.</p>
+        )}
         </div>
+    </div>
     )
-
 }

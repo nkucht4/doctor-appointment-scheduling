@@ -6,6 +6,13 @@ export default function TimeSlot(props) {
     const [showDetails, setShowDetails] = useState(false);
     const { setEditFlag } = useContext(AppointmentContext);
     const { token } = useContext(AuthContext);
+    const { user } = useContext(AuthContext);
+
+    const isDoctor = user?.role === "DOCTOR";
+    const isPatient = user?.role === "PATIENT";
+
+    const isOwner = (isDoctor && String(props.reservation?.doctor_id) === String(user.id)) || 
+                (isPatient && String(props.reservation?.patient_id) === String(user.id));
 
     const isEmptyClickable =
         !props.reservation &&
@@ -34,8 +41,7 @@ export default function TimeSlot(props) {
         recepta: "bg-danger"
     }
 
-    const name = props.reservation
-    ? TYPE_LABELS[props.reservation.title] : ""
+    const name = isOwner && props.reservation ? TYPE_LABELS[props.reservation.title] || "" : "";
 
     let className;
     if (props.isAbsent && props.isToday){
@@ -55,8 +61,11 @@ export default function TimeSlot(props) {
     }
     else if (props.isToday && !props.reservation)
         className="today-highlight";
-    else if (props.reservation)
-        className=COLORS[props.reservation.title]
+    else if (props.reservation && isOwner && COLORS[props.reservation.title]) {
+    className = COLORS[props.reservation.title];
+    } else if (props.reservstion){
+    className = "bg-secondary"; 
+    }
 
     const handleCancel = async () => {
         if (!props.reservation?._id) return;
@@ -128,18 +137,24 @@ export default function TimeSlot(props) {
         className={className}
         onClick={handleClick}
         rowSpan={props.rowSpan || 1} 
-        style={(isEmptyClickable || props.reservation) ? { cursor: "pointer" } : {}}
+        style={(isEmptyClickable || (props.reservation && isDoctor)) ? { cursor: "pointer" } : {}}
         >
         <div className="h-100 w-100 d-flex">
         <div
             className={`flex-fill d-flex align-items-center justify-content-center flex-column`}
         >
-        {props.reservation && (
+        {props.reservation  && isOwner && (
             <small className="text-white fw-bold">
             {name}
             </small>
         )}
-        {showDetails &&
+
+        {props.reservation && !isOwner && (
+        <small className="text-muted fst-italic">
+            Termin zajęty
+        </small>
+        )}
+        {showDetails && isOwner && (
         <div className="text-white mt-1" style={{ fontSize: '0.8rem' }}>
             <div><strong>Pacjent:</strong> {props.reservation.patient}</div>
             <div><strong>Wiek pacjenta:</strong> {props.reservation.age}</div>
@@ -157,7 +172,7 @@ export default function TimeSlot(props) {
             className="btn btn-link p-0 text-light"
             onClick={handleCancel}
             >Odwołaj wizytę</button>
-        </div>
+        </div>)
         }
         </div>
         </div>

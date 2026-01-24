@@ -4,8 +4,7 @@ const User = require("../models/UserModel");
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret"; 
 
-const ACCESS_TOKEN_TTL = "1m";   
-const REFRESH_TOKEN_TTL = "7d"
+const ACCESS_TOKEN_TTL = "1d";   
 
 exports.register = async (req, res) => {
   try {
@@ -66,15 +65,6 @@ exports.loginUser = async (req, res) => {
       role: user.role
     };
 
-    const refreshToken = jwt.sign(
-    { id: user._id },
-    JWT_SECRET,
-    { expiresIn: REFRESH_TOKEN_TTL }
-  );
-
-  user.refreshToken = refreshToken;
-  await user.save();
-
   const accessToken = jwt.sign(
   {
     id: user._id,
@@ -87,7 +77,6 @@ exports.loginUser = async (req, res) => {
 
   res.json({
     accessToken,
-    refreshToken,
     user: payload
   });
 
@@ -97,25 +86,38 @@ exports.loginUser = async (req, res) => {
   }
 };
 
-exports.refreshToken = async (req, res) => {
-  const { refreshToken } = req.body;
-  if (!refreshToken) return res.sendStatus(401);
-
-  const user = await User.findOne({ refreshToken });
-  if (!user) return res.sendStatus(403);
-
+exports.registerDoctor = async (req, res) => {
   try {
-    jwt.verify(refreshToken, JWT_SECRET);
+    const { firstName, lastName, email, password, specialization } = req.body;
 
-    const newAccessToken = jwt.sign(
-      { id: user._id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: ACCESS_TOKEN_TTL }
-    );
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({ message: "Please fill all required fields" });
+    }
 
-    res.json({ accessToken: newAccessToken });
-  } catch {
-    res.sendStatus(403);
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ message: "User with this email already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const doctor = new User({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      specialization: specialization || "",
+      role: "DOCTOR"
+    });
+
+    await doctor.save();
+
+    return res.status(201).json({ message: "Doctor registered successfully" });
+
+  } catch (error) {
+    console.error("Error registering doctor:", error);
+    return res.status(500).json({ message: "Server error" });
   }
 };
+
 

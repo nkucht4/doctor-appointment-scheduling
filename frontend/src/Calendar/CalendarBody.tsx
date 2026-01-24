@@ -3,6 +3,7 @@ import { useState, useEffect, useContext } from "react";
 import ConsultationForm from "../Consultations/ConsultationForm";
 import { AppointmentContext } from "../Providers/AppointmentProvider";
 import { AvailabilityContext } from "../Providers/AvailabilityProvider";
+import { AuthContext } from "../Providers/AuthProvider";
 
 export default function CalendarBody(props){
     const [ startHour, setStartHour ] = useState(10);
@@ -12,6 +13,7 @@ export default function CalendarBody(props){
     const [ showNewAppointment, setShowNewAppointment] = useState(false);
     const [ selectedSlot, setSelectedSlot ] = useState({ time: "", date: ""});
     const { absence, availability } = useContext(AvailabilityContext);
+    const { appointmentsPatient } = useContext(AuthContext);
 
     const timeToMinutes = (timeStr) => {
         const [h, m] = timeStr.split(":").map(Number);
@@ -97,6 +99,16 @@ export default function CalendarBody(props){
         return dt;
     }
 
+    const findAppointmentStartForSlotPatient = (date, time) => {
+        if (appointmentsPatient){
+           const day = formatDate(date);
+            return appointmentsPatient.find(
+                a => a.date === day && a.time === time
+            );  
+        }
+       
+    };
+
     const findAppointmentStartForSlot = (date, time) => {
         const day = formatDate(date);
         return props.appointments.find(
@@ -129,6 +141,13 @@ export default function CalendarBody(props){
     const isSlotCoveredByAppointment = (dateStr, timeStr, appointments) => {
     const timeMins = timeToMinutes(timeStr);
 
+    const isOwnerAppointment = (appointment) => {
+        if (!appointment) return false;
+        if (user.role === "DOCTOR") return appointment.doctor_id === user.id;
+        if (user.role === "PATIENT") return appointment.patient_id === user.id;
+        return false;
+    };
+
     return appointments.some(appt => {
         if (appt.date !== dateStr) return false;
 
@@ -149,9 +168,10 @@ export default function CalendarBody(props){
                 const slotDateTime = getDateTime(date, time);
                 const hasPassed = slotDateTime < now;
                 const dayStr = formatDate(date);
-
+                
                 const appointmentStart = findAppointmentStartForSlot(date, time);
                 const isCovered = isSlotCoveredByAppointment(dayStr, time, props.appointments);
+
 
                 if (!appointmentStart && isCovered) {
                 return null;

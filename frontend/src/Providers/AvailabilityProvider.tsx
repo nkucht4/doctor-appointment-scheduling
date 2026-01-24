@@ -8,7 +8,9 @@ export default function AvailabilityProvider({ children }){
     const [editFlag2, setEditFlag2] = useState(false);
     const [availability, setvAvailability] = useState([]);
     const [ absence, setAbsence ] = useState([]);
-    const { token } = useContext(AuthContext);
+    const { token, user } = useContext(AuthContext);
+    const [ doctorIdAv, setDoctorIdAv ] = useState(user?.role === "DOCTOR" ? parseJwt(token).token : null);
+    const [ checkDoc2, setCheckDoc2 ] = useState(false);
 
     const formatDate = (date) => {
         const year = date.getFullYear();
@@ -17,24 +19,62 @@ export default function AvailabilityProvider({ children }){
         return `${year}-${month}-${day}`;
     };
 
+    function parseJwt(token) {
+    if (!token) return null;
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(c => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      console.error("Failed to parse JWT:", e);
+      return null;
+    }
+  }
+
+    useEffect(()=>{
+        console.log("A", doctorIdAv)
+    }, [doctorIdAv])
+
     useEffect(() => {
-    fetch("http://localhost:8080/availability",
+    fetch(`http://localhost:8080/availability/doctor/${doctorIdAv}`,
         { headers: {
             Authorization: `Bearer ${token}`
         }}
     )
-        .then(a => a.json())
+        .then(res => {
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    return res.json();
+  })
         .then(a => setvAvailability(a.map(x=>{return{...x, date_from: formatDate(new Date(x.date_from)),
             date_to: formatDate(new Date(x.date_to))
-        }})));
+        }}))).catch(err => {
+      console.log(err);
+      setvAvailability([]);
+    });
 
-    fetch("http://localhost:8080/absence", { headers: {Authorization: `Bearer ${token}`}})
-        .then((res)=>res.json())
+    fetch(`http://localhost:8080/absence/doctor/${doctorIdAv}`, { headers: {Authorization: `Bearer ${token}`}})
+        .then(res => {
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    return res.json();
+  })
         .then(a => setAbsence(a.map(x=>{return{...x, date_from: formatDate(new Date(x.date_from)),
             date_to: formatDate(new Date(x.date_to))
-        }})));
+        }}))).catch(err => {
+      console.log(err);
+      setAbsence([]);
+    });
 
-    }, [editFlag, editFlag2, token]);
+    }, [editFlag, editFlag2, token, doctorIdAv]);
 
     const getAvailabilityForWeek = (weekDates) => {
          availability.filter(({ date_from, date_to }) => {
@@ -68,7 +108,7 @@ export default function AvailabilityProvider({ children }){
         };
 
     return (
-        <AvailabilityContext.Provider value={{ availability, getAvailabilityForWeek, getAvailabilityForDay, setEditFlag, setEditFlag2, absence}}>
+        <AvailabilityContext.Provider value={{ availability, getAvailabilityForWeek, setCheckDoc2, getAvailabilityForDay, setEditFlag, setDoctorIdAv, setEditFlag2, doctorIdAv, absence}}>
             {children}
         </AvailabilityContext.Provider>
     );

@@ -10,7 +10,33 @@ export default function Layout() {
     switch(role) {
       case 'ADMIN':
         return (
-<></>
+          <>
+             <Link className="navbar-brand" to="/">
+          Doctor Calendar
+        </Link>
+
+            <Link className="navbar-brand" to="/admin_panel">
+              Panel Admina
+            </Link>
+
+                    <div className="ms-auto d-flex gap-3 align-items-center">
+            <>
+
+                <span className="navbar-text me-3">
+                {user?.firstName} {user?.lastName}
+                </span>
+              
+
+              <button
+                className="btn btn-outline-secondary btn-sm"
+                onClick={logout}
+              >
+                Wyloguj
+              </button>
+            </>
+        </div>
+
+          </>
         );
       case 'DOCTOR':
         return (
@@ -19,7 +45,7 @@ export default function Layout() {
           Doctor Calendar
         </Link>
 
-            <Link className="navbar-brand" to="/doctors_harmonogram">
+            <Link className="navbar-brand" to={`/calendar/doctor/${user?.id}`}>
               Mój harmonogram
             </Link>
 
@@ -47,9 +73,6 @@ export default function Layout() {
           Doctor Calendar
         </Link>
 
-        <Link className="navbar-brand" to="/doctors">
-              Lista lekarzy
-            </Link>
 
             <Link className="navbar-brand" to="/doctors_harmonogram">
               Harmonogram lekarzy

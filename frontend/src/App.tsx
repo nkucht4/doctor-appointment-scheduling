@@ -14,6 +14,9 @@ import AuthProvider from './Providers/AuthProvider'
 import PublicLayout from './Views/PublicLayout'
 import ProtectedRoute from './ProtectedRoute'
 import DoctorList from './User/DoctorList'
+import MainPage from './Views/MainPage'
+import AdminPanel from './Admin/AdminPanel'
+import DoctorCalendarRoute from './DoctorCalendarRoute'
 
 function App() {
   return (
@@ -30,14 +33,26 @@ function App() {
             <Route path="/register" element={<RegisterForm />} />
           </Route>
 
-          <Route element={<ProtectedRoute />}>
+          <Route element={<ProtectedRoute allowedRoles={["ADMIN", "DOCTOR", "PATIENT"]}/>}>
             <Route element={<Layout />}>
-              <Route path="/" element={<CalendarView/>}/>
+              <Route path="/" element={<MainPage/>}/>
+              <Route element={<DoctorCalendarRoute/>}>
+                <Route path="/calendar/doctor/:doctorId" element={<CalendarView />} />
+              </Route>
+            </Route>
+            </Route>
+
+            <Route element={<ProtectedRoute allowedRoles={["PATIENT"]} />}>
+            <Route element={<Layout />}>
               <Route path="/consultation_list" element={<ConsultationList/>}/>
-              <Route path="/register" element={<RegisterForm/>}/>
-              <Route path="/login" element={<LoginForm/>}/>
-              <Route path="/doctors_harmonogram" element={<CalendarView/>}/>
-              <Route path="/doctors_harmonogram" element={<CalendarView/>}/>
+              <Route path="/doctors_harmonogram" element={<DoctorList/>}/>
+            </Route>
+            </Route>
+
+
+            <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+            <Route element={<Layout />}>
+              <Route path="/admin_panel" element={<AdminPanel />} />
             </Route>
             </Route>
           </Routes>

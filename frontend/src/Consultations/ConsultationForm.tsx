@@ -6,7 +6,7 @@ import { AuthContext } from "../Providers/AuthProvider";
 
 export default function ConsultationForm(props) {
     const { getAppointmentsForDay, setEditFlag } = useContext(AppointmentContext);
-    const { getAvailabilityForDay } = useContext(AvailabilityContext);
+    const { getAvailabilityForDay, doctorIdAv } = useContext(AvailabilityContext);
     const [ appointmentsToday, setAppointmentsToday ] = useState([]);
     const [ available, setAvailable ] = useState([]);
     const { token } = useContext(AuthContext);
@@ -99,7 +99,6 @@ export default function ConsultationForm(props) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validate()) return;
-
         //saveAppointment(form);
         try {
             const formData = new FormData();
@@ -108,6 +107,7 @@ export default function ConsultationForm(props) {
                 formData.append(key, form[key]);
             }
             }
+            formData.append("doctor_id", doctorIdAv);
 
             const response = await fetch("http://localhost:8080/appointment", {
             method: "POST",

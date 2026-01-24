@@ -5,12 +5,13 @@ type User = {
   firstName: string;
   lastName: string;
   email: string;
+  role: string;
 };
 
 type AuthContextType = {
   token: string | null;
   user: User | null;
-  login: (accessToken: string, user: User, refreshToken: string) => void;
+  login: (accessToken: string, user: User) => void;
   logout: () => void;
   isAuthenticated: boolean;
 };
@@ -52,11 +53,10 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     initAuth();
   }, []);
 
-
-  const login = (accessToken: string, user: User, refreshToken: string) => {
+  
+  const login = (accessToken: string, user: User) => {
     if (storage) {
       storage.setItem("token", accessToken);
-      storage.setItem("refreshToken", refreshToken);
       storage.setItem("user", JSON.stringify(user));
     }
 
@@ -67,49 +67,12 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
   const logout = () => {
     storage?.removeItem("token");
-    storage?.removeItem("refreshToken");
     storage?.removeItem("user");
 
     setToken(null);
     setUser(null);
   };
 
-
-  useEffect(() => {
-    const interceptor = axios.interceptors.response.use(
-      res => res,
-      async error => {
-        if (error.response?.status === 401) {
-          try {
-            const refreshToken = storage?.getItem("refreshToken");
-            if (!refreshToken) throw new Error("No refresh token");
-
-            const res = await axios.post("http://localhost:8080/auth//refresh_token", {
-              refreshToken
-            });
-
-            const newAccessToken = res.data.accessToken;
-
-            storage?.setItem("token", newAccessToken);
-            setToken(newAccessToken);
-
-            error.config.headers.Authorization = `Bearer ${newAccessToken}`;
-            return axios(error.config);
-          } catch {
-            logout();
-          }
-        }
-
-        if (error.response?.status === 403) {
-          logout(); 
-        }
-
-        return Promise.reject(error);
-      }
-    );
-
-    return () => axios.interceptors.response.eject(interceptor);
-  }, [storage]);
 
 
   if (!initialized) return null; 

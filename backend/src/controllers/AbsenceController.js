@@ -2,16 +2,36 @@ const Absence = require("../models/AbsenceModel");
 
 exports.createAbsence = async (req, res) => {
   try {
-    const absenceData = req.body;
+    const { date_from, date_to } = req.body;
 
-    const absence = new Absence(absenceData);
+    let doctorId;
+
+    if (req.user.role === "DOCTOR") {
+      doctorId = req.user.id;
+    } 
+    else {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    const absence = new Absence({
+      doctor_id: doctorId,
+      date_from,
+      date_to
+    });
+
     await absence.save();
 
-    res.status(201).json({ message: "Absence created", absence });
+    res.status(201).json({
+      message: "Absence created",
+      absence
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error creating absence", error: error.message });
+    res.status(500).json({
+      message: "Error creating absence",
+      error: error.message
+    });
   }
 };
+
 
 exports.getAbsences = async (req, res) => {
   try {
@@ -37,7 +57,7 @@ exports.getAbsenceById = async (req, res) => {
 
 exports.getAbsencesByDoctorId = async (req, res) => {
   try {
-    const { doctorId } = req.params;
+    const { id: doctorId } = req.params;
 
     const absences = await Absence.find({ doctor_id: doctorId });
 
@@ -56,28 +76,64 @@ exports.getAbsencesByDoctorId = async (req, res) => {
 
 exports.updateAbsence = async (req, res) => {
   try {
-    const id = req.params.id;
-    const updatedData = req.body;
+    const { id } = req.params;
 
-    const absences = await Absence.findByIdAndUpdate(id, updatedData, { new: true });
-    if (!absences) {
-      return res.status(404).json({ message: "Absences not found" });
+    delete req.body.doctor_id;
+
+    let query = { _id: id };
+
+    if (req.user.role === "DOCTOR") {
+      query.doctor_id = req.user.id;
+    } else if (req.user.role !== "ADMIN") {
+      return res.status(403).json({ message: "Forbidden" });
     }
-    res.status(200).json({ message: "Absences updated", absences });
+
+    const absence = await Absence.findOneAndUpdate(
+      query,
+      req.body,
+      { new: true }
+    );
+
+    if (!absence) {
+      return res.status(404).json({ message: "Absence not found" });
+    }
+
+    res.status(200).json({
+      message: "Absence updated",
+      absence
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error updating absences", error: error.message });
+    res.status(500).json({
+      message: "Error updating absence",
+      error: error.message
+    });
   }
 };
 
+
 exports.deleteAbsence = async (req, res) => {
   try {
-    const id = req.params.id;
-    const absences = await Absence.findByIdAndDelete(id);
-    if (!absences) {
-      return res.status(404).json({ message: "Absences not found" });
+    const { id } = req.params;
+
+    let query = { _id: id };
+
+    if (req.user.role === "DOCTOR") {
+      query.doctor_id = req.user.id;
+    } else if (req.user.role !== "ADMIN") {
+      return res.status(403).json({ message: "Forbidden" });
     }
-    res.status(200).json({ message: "Absences deleted" });
+
+    const absence = await Absence.findOneAndDelete(query);
+
+    if (!absence) {
+      return res.status(404).json({ message: "Absence not found" });
+    }
+
+    res.status(200).json({ message: "Absence deleted" });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting absence", error: error.message });
+    res.status(500).json({
+      message: "Error deleting absence",
+      error: error.message
+    });
   }
 };

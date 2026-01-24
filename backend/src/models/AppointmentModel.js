@@ -61,7 +61,15 @@ const AppointmentSchema = new mongoose.Schema({
     file: {
         data: Buffer,         
         contentType: String  
-    }
+    },
+    doctor_id: { 
+            type: mongoose.SchemaTypes.ObjectId,
+            required: true
+        },
+    patient_id: { 
+            type: mongoose.SchemaTypes.ObjectId,
+            required: true
+        }
 });
 
 module.exports = mongoose.model("Appointment", AppointmentSchema);

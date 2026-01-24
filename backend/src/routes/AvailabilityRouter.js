@@ -7,7 +7,7 @@ const { authorizeRole } = require('../middleware/AuthorizeRoleMiddleware');
 console.log("authorizeRole =", authorizeRole);
 
 router.post("/", authenticateToken, authorizeRole("DOCTOR", "ADMIN"), availabilityController.createAvailability);
-router.get("/", authenticateToken, authorizeRole("DOCTOR", "ADMIN", "PATIENT"), availabilityController.getAvailabilities);
+router.get("/doctor/:id", authenticateToken, authorizeRole("DOCTOR", "ADMIN", "PATIENT"), availabilityController.getAvailabilityByDoctorId);
 router.put("/:id", authenticateToken, authorizeRole("DOCTOR", "ADMIN"), availabilityController.updateAvailability);
 router.delete("/:id", authenticateToken, authorizeRole("DOCTOR", "ADMIN"), availabilityController.deleteAvailability);
 

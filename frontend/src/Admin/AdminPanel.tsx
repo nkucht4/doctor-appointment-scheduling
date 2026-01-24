@@ -7,6 +7,7 @@ export default function AdminPanel() {
   const [allUsers, setAllUsers] = useState([]);
   const [message, setMessage] = useState(null); 
   const { token } = useContext(AuthContext);
+  const [ change, setChange ] = useState(false);
 
   const handleAddDoctor = async (doctorData) => {
     const newDoctor = {
@@ -45,7 +46,7 @@ export default function AdminPanel() {
       .then((a) => a.json())
       .then((a) => setAllUsers(a))
       .catch((e) => setMessage({ type: "error", text: "Błąd podczas pobierania użytkowników" }));
-  }, [token]);
+  }, [token, change]);
 
   const doctors = allUsers.filter((u) => u.role === "DOCTOR");
   const patients = allUsers.filter((u) => u.role === "PATIENT");
@@ -71,10 +72,10 @@ export default function AdminPanel() {
       <AddDoctorForm onAdd={handleAddDoctor} />
 
       <h3>Lekarze</h3>
-      <UserList users={doctors} />
+      <UserList users={doctors}/>
 
       <h3 className="mt-4">Pacjenci</h3>
-      <UserList users={patients} />
+      <UserList users={patients} fetchUsers={()=>{setChange(p=>!p)}}/>
     </div>
   );
 }

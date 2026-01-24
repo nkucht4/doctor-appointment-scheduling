@@ -17,6 +17,7 @@ import DoctorList from './User/DoctorList'
 import MainPage from './Views/MainPage'
 import AdminPanel from './Admin/AdminPanel'
 import DoctorCalendarRoute from './DoctorCalendarRoute'
+import DoctorCommentsList from './Comments/DoctorCommentsList'
 
 function App() {
   return (
@@ -38,11 +39,12 @@ function App() {
               <Route path="/" element={<MainPage/>}/>
               <Route element={<DoctorCalendarRoute/>}>
                 <Route path="/calendar/doctor/:doctorId" element={<CalendarView />} />
+                <Route path="/doctor/:doctorId/reviews" element={<DoctorCommentsList/>}/>
               </Route>
             </Route>
             </Route>
 
-            <Route element={<ProtectedRoute allowedRoles={["PATIENT"]} />}>
+            <Route element={<ProtectedRoute allowedRoles={["PATIENT", "ADMIN"]} />}>
             <Route element={<Layout />}>
               <Route path="/consultation_list" element={<ConsultationList/>}/>
               <Route path="/doctors_harmonogram" element={<DoctorList/>}/>

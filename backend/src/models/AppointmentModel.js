@@ -58,17 +58,23 @@ const AppointmentSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    rated: {
+        type: Boolean,
+        default: false
+    },
     file: {
         data: Buffer,         
         contentType: String  
     },
     doctor_id: { 
             type: mongoose.SchemaTypes.ObjectId,
-            required: true
+            required: true,
+            ref: "User"       
         },
     patient_id: { 
             type: mongoose.SchemaTypes.ObjectId,
-            required: true
+            required: true,
+            ref: "User"
         }
 });
 

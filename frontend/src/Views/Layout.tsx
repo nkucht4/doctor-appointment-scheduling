@@ -19,6 +19,10 @@ export default function Layout() {
               Panel Admina
             </Link>
 
+            <Link className="navbar-brand" to="/doctors_harmonogram">
+              Harmonogram lekarzy
+            </Link>
+
                     <div className="ms-auto d-flex gap-3 align-items-center">
             <>
 
@@ -49,6 +53,10 @@ export default function Layout() {
               Mój harmonogram
             </Link>
 
+            <Link className="navbar-brand" to={`/doctor/${user?.id}/reviews`}>
+              Moje opinie
+            </Link>
+
         <div className="ms-auto d-flex gap-3 align-items-center">
             <>
 
@@ -75,7 +83,7 @@ export default function Layout() {
 
 
             <Link className="navbar-brand" to="/doctors_harmonogram">
-              Harmonogram lekarzy
+              Harmonogramy lekarzy
             </Link>
 
         <div className="ms-auto d-flex gap-3 align-items-center">

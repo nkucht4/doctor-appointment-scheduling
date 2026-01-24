@@ -39,6 +39,11 @@ const userSchema = new Schema({
     default: "PATIENT"
   },
 
+  banned: {
+    type: Boolean,
+    default: false
+  },
+
   refreshToken: {
   type: String
 }

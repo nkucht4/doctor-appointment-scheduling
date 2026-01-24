@@ -6,6 +6,7 @@ const appointmentRoutes = require("./routes/AppointmentRouter");
 const authRoutes = require("./routes/AuthRouter")
 const authSettingsRouter = require("./routes/AuthSettingsRouter")
 const userRouter = require("./routes/UserRouter")
+const ratingRouter =  require("./routes/RatingRouter")
 const connectDB = require("./db");
 
 const app = express();
@@ -22,6 +23,7 @@ app.use("/appointment", appointmentRoutes);
 app.use("/auth", authRoutes);
 app.use("/auth_settings", authSettingsRouter);
 app.use("/users", userRouter);
+app.use("/ratings", ratingRouter);
 
 const PORT = process.env.PORT || 8080; app.listen(PORT, () =>{
 console.log(`Server is running on port ${PORT}.`); })

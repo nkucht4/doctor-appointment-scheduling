@@ -27,7 +27,7 @@ export default function ConsultationListElement(props){
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({...reservation, paid: true}),
+                body: JSON.stringify({paid: true}),
             }
         );
 
@@ -35,37 +35,67 @@ export default function ConsultationListElement(props){
             throw new Error("Failed to update payment status");
         }
 
-        setEditFlag(p=>!p);
+        alert("Paid!");
+
+        props.onPay();
     };
 
     return (
         <div className="card mb-3 shadow-sm">
             <div className="card-body">
                 <h5 className="card-title">{name}</h5>
-                <p className="card-text mb-1">
-                <strong>Pacjent:</strong> {reservation.patient}
-                </p>
-                <p className="card-text mb-1">
-                <strong>Wiek pacjenta:</strong> {reservation.age}
-                </p>
-                {reservation.notes && (
-                <p className="card-text mb-3">
-                    <strong>Notatki:</strong> {reservation.notes}
-                </p>
-                )}
 
-                { !reservation.paid && ( <>
+                <div className="row">
+                <div className="col-6">
+                    <p className="card-text mb-1">
+                    <strong>Pacjent:</strong> {reservation.patient}
+                    </p>
+
+                    <p className="card-text mb-1">
+                    <strong>Data wizyty:</strong>{" "}
+                    {new Date(reservation.date).toLocaleDateString("pl-PL")}
+                    </p>
+
+                    <p className="card-text mb-1">
+                    <strong>Czas trwania:</strong> {reservation.duration} min
+                    </p>
+
+                    { reservation.notes &&
+                    <p className="card-text mb-1">
+                    <strong>Notatki:</strong> {reservation.notes}
+                    </p>
+                    }
+                </div>
+
+                <div className="col-6">
+                    <p className="card-text mb-1">
+                    <strong>Lekarz:</strong>{" "}
+                    {reservation.doctor_id.firstName} {reservation.doctor_id.lastName}
+                    </p>
+
+                    <p className="card-text mb-1">
+                    <strong>Godzina:</strong> {reservation.time}
+                    </p>
+
+                    <p className="card-text mb-1">
+                    <strong>Wiek pacjenta:</strong> {reservation.age}
+                    </p>
+                </div>
+                </div>
+
+                {!reservation.paid && (
                 <div className="d-flex justify-content-end gap-2">
-                <button
+                    <button
                     type="button"
                     className="btn btn-outline-primary btn-sm"
                     onClick={handlePayment}
-                >
+                    >
                     Zapłać
-                </button>
+                    </button>
                 </div>
-                </>)}
+                )}
             </div>
             </div>
+
     )
 }

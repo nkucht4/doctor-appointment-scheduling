@@ -3,7 +3,16 @@ import { AuthContext } from "./AuthProvider";
 
 export const AppointmentContext = createContext();
 
-function parseJwt(token) {
+export default function AppointmentProvider({ children }){
+    const [editFlag, setEditFlag] = useState(false);
+    const [appointments, setAppointments] = useState([]);
+    const [appointmentsPatient, setAppointmentsPatient] = useState([]);
+    const { token, user } = useContext(AuthContext);
+    const [ doctorIdAp, setDoctorIdAp ] = useState(user?.role === "DOCTOR" ? parseJwt(token).token : null);
+    const [ patientIdAp, setPatientIdAp ] = useState(null);
+    const [ doctorCheck, setDoctorCheck] = useState(true);
+
+    function parseJwt(token) {
     if (!token) return null;
     try {
       const base64Url = token.split('.')[1];
@@ -20,15 +29,6 @@ function parseJwt(token) {
       return null;
     }
   }
-
-export default function AppointmentProvider({ children }){
-    const [editFlag, setEditFlag] = useState(false);
-    const [appointments, setAppointments] = useState([]);
-    const [appointmentsPatient, setAppointmentsPatient] = useState([]);
-    const { token, user } = useContext(AuthContext);
-    const [ doctorIdAp, setDoctorIdAp ] = useState(user?.role === "DOCTOR" ? parseJwt(token).token : null);
-    const [ patientIdAp, setPatientIdAp ] = useState(null);
-    const [ doctorCheck, setDoctorCheck] = useState(true);
 
     const formatDate = (date) => {
         const year = date.getFullYear();
@@ -75,7 +75,7 @@ export default function AppointmentProvider({ children }){
     };
 
     return (
-        <AppointmentContext.Provider value={{ appointments, getAppointmentsForWeek, setDoctorCheck, appointmentsPatient, formatDate, getAppointmentsForDay, setEditFlag, setDoctorIdAp, setPatientIdAp, setAppointmentsPatient}}>
+        <AppointmentContext.Provider value={{ appointments, getAppointmentsForWeek, setDoctorCheck, appointmentsPatient, formatDate, getAppointmentsForDay, setEditFlag, setDoctorIdAp, setPatientIdAp, setAppointmentsPatient, parseJwt}}>
             {children}
         </AppointmentContext.Provider>
     );

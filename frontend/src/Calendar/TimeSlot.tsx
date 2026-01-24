@@ -167,11 +167,12 @@ export default function TimeSlot(props) {
             onClick={handleDownload}
             >Pobierz plik</button> <br/> </>}
 
+            { !props.hasPassed && 
             <button
             type="button"
             className="btn btn-link p-0 text-light"
             onClick={handleCancel}
-            >Odwołaj wizytę</button>
+            >Odwołaj wizytę</button>}
         </div>)
         }
         </div>

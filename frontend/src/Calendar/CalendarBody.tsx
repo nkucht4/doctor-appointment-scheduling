@@ -5,6 +5,28 @@ import { AppointmentContext } from "../Providers/AppointmentProvider";
 import { AvailabilityContext } from "../Providers/AvailabilityProvider";
 import { AuthContext } from "../Providers/AuthProvider";
 
+const timeToMinutes = (timeStr) => {
+        const [h, m] = timeStr.split(":").map(Number);
+        return h * 60 + m;
+    };
+
+const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+}
+
+const isTimeInRanges = (timeStr, times) => {
+    if (!times || times.length === 0) return false;
+        const timeMins = timeToMinutes(timeStr);
+        return times.some(({ from, to }) => {
+            const fromMins = timeToMinutes(from);
+            const toMins = timeToMinutes(to);
+            return timeMins >= fromMins && timeMins < toMins;
+        });
+    };
+
 export default function CalendarBody(props){
     const [ startHour, setStartHour ] = useState(10);
     const [ endHour, setEndHour ] = useState(16);
@@ -13,21 +35,6 @@ export default function CalendarBody(props){
     const [ showNewAppointment, setShowNewAppointment] = useState(false);
     const [ selectedSlot, setSelectedSlot ] = useState({ time: "", date: ""});
     const { absence, availability } = useContext(AvailabilityContext);
-    const { appointmentsPatient } = useContext(AuthContext);
-
-    const timeToMinutes = (timeStr) => {
-        const [h, m] = timeStr.split(":").map(Number);
-        return h * 60 + m;
-    };
-
-    const minutesToHour = (minutes) => minutes / 60;
-
-    const formatDate = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
-    }
 
     useEffect(()=>{
         const weekDateStrings = props.weekDates.map(formatDate);
@@ -99,16 +106,6 @@ export default function CalendarBody(props){
         return dt;
     }
 
-    const findAppointmentStartForSlotPatient = (date, time) => {
-        if (appointmentsPatient){
-           const day = formatDate(date);
-            return appointmentsPatient.find(
-                a => a.date === day && a.time === time
-            );  
-        }
-       
-    };
-
     const findAppointmentStartForSlot = (date, time) => {
         const day = formatDate(date);
         return props.appointments.find(
@@ -128,25 +125,8 @@ export default function CalendarBody(props){
         return now >= slotStart && now < slotEnd;
     }
 
-    const isTimeInRanges = (timeStr, times) => {
-    if (!times || times.length === 0) return false;
-        const timeMins = timeToMinutes(timeStr);
-        return times.some(({ from, to }) => {
-            const fromMins = timeToMinutes(from);
-            const toMins = timeToMinutes(to);
-            return timeMins >= fromMins && timeMins < toMins;
-        });
-    };
-
     const isSlotCoveredByAppointment = (dateStr, timeStr, appointments) => {
     const timeMins = timeToMinutes(timeStr);
-
-    const isOwnerAppointment = (appointment) => {
-        if (!appointment) return false;
-        if (user.role === "DOCTOR") return appointment.doctor_id === user.id;
-        if (user.role === "PATIENT") return appointment.patient_id === user.id;
-        return false;
-    };
 
     return appointments.some(appt => {
         if (appt.date !== dateStr) return false;

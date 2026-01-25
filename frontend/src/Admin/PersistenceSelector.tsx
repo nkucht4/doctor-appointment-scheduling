@@ -7,34 +7,36 @@ export default function PersistenceSelector() {
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
-    async function fetchMode() {
-      try {
-        const res = await fetch("http://localhost:8080/auth_settings");
+    fetch("http://localhost:8080/auth_settings")
+      .then((res) => {
         if (!res.ok) throw new Error("Fetch failed");
-        const data = await res.json();
+        return res.json();
+      })
+      .then((data) => {
         setMode(data.persistenceMode || "local");
-      } catch {
+      })
+      .catch(() => {
         setMessage("Błąd ładowania ustawień");
-      }
-    }
-    fetchMode();
+      });
   }, []);
 
-  const handleSave = async () => {
+  const handleSave = () => {
     setMessage("");
-    try {
-      const res = await fetch("http://localhost:8080/auth_settings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ mode }),
+    fetch("http://localhost:8080/auth_settings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ mode }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Save failed");
+        setMessage("Zapisano pomyślnie!");
+      })
+      .catch(() => {
+        setMessage("Błąd zapisu");
       });
-      if (!res.ok) throw new Error("Save failed");
-      setMessage("Zapisano pomyślnie!");
-    } catch {
-      setMessage("Błąd zapisu");
-    }
   };
 
   return (

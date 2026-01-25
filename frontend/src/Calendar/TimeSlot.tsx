@@ -139,44 +139,42 @@ export default function TimeSlot(props) {
         rowSpan={props.rowSpan || 1} 
         style={(isEmptyClickable || (props.reservation && isDoctor)) ? { cursor: "pointer" } : {}}
         >
-        <div className="h-100 w-100 d-flex">
-        <div
-            className={`flex-fill d-flex align-items-center justify-content-center flex-column`}
-        >
-        {props.reservation  && isOwner && (
-            <small className="text-white fw-bold">
-            {name}
-            </small>
-        )}
+            <div className="h-100 w-100 d-flex">
+                <div
+                    className={`flex-fill d-flex align-items-center justify-content-center flex-column`}
+                >
+                    {props.reservation  && isOwner && (
+                        <small className="text-white fw-bold">
+                            {name}
+                        </small>
+                    )}
 
-        {props.reservation && !isOwner && (
-        <small className="text-muted fst-italic">
-            Termin zajęty
-        </small>
-        )}
-        {showDetails && isOwner && (
-        <div className="text-white mt-1" style={{ fontSize: '0.8rem' }}>
-            <div><strong>Pacjent:</strong> {props.reservation.patient}</div>
-            <div><strong>Wiek pacjenta:</strong> {props.reservation.age}</div>
-            <div><strong>Notatki:</strong> {props.reservation.notes}</div>
+                    {props.reservation && !isOwner && (
+                        <small className="text-muted fst-italic">
+                            Termin zajęty
+                        </small>
+                    )}
+                    {showDetails && isOwner && (
+                    <div className="text-white mt-1" style={{ fontSize: '0.8rem' }}>
+                        <div><strong>Pacjent:</strong> {props.reservation.patient}</div>
+                        <div><strong>Wiek pacjenta:</strong> {props.reservation.age}</div>
+                        <div><strong>Notatki:</strong> {props.reservation.notes}</div>
 
-            { props.reservation.file && <>
-            <button
-            type="button"
-            className="btn btn-link p-0 text-light"
-            onClick={handleDownload}
-            >Pobierz plik</button> <br/> </>}
+                        { props.reservation.file && <>
+                            <button
+                            type="button"
+                            className="btn btn-link p-0 text-light"
+                            onClick={handleDownload}>Pobierz plik</button> <br/> </>}
 
-            { !props.hasPassed && 
-            <button
-            type="button"
-            className="btn btn-link p-0 text-light"
-            onClick={handleCancel}
-            >Odwołaj wizytę</button>}
-        </div>)
-        }
-        </div>
-        </div>
+                        { !props.hasPassed && 
+                            <button
+                            type="button"
+                            className="btn btn-link p-0 text-light"
+                            onClick={handleCancel}>Odwołaj wizytę</button>}
+                    </div>)
+                    }
+                </div>
+            </div>
         </td>
   );
 }

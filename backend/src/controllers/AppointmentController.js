@@ -1,4 +1,5 @@
 const Appointment = require("../models/AppointmentModel");
+const notificationService = require("../services/notificationService")
 
 const LIMITED_APPOINTMENT_FIELDS = {
   date: 1,
@@ -167,6 +168,14 @@ exports.deleteAppointment = async (req, res) => {
     if (!appointment) {
       return res.status(404).json({ message: "Appointment not found" });
     }
+
+    await notificationService.createNotification({
+      userId: appointment.patient_id,
+      message: `Wizyta została anulowana (${new Date(
+        appointment.date
+      ).toLocaleString()})`,
+      date: new Date(),
+    });
 
     res.status(200).json({ message: "Appointment deleted" });
   } catch (error) {

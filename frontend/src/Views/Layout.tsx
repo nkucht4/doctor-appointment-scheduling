@@ -1,10 +1,49 @@
 import { Link, Outlet } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../Providers/AuthProvider";
+import NotificationBell from "../Notifications/NotificationBell";
+import { NotificationsList } from "../Notifications/NotificationsList";
 
 export default function Layout() {
-  const { isAuthenticated, logout, user } = useContext(AuthContext);
+  const { isAuthenticated, logout, user, token } = useContext(AuthContext);
   const role = user?.role || 'GUEST';
+  
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showList, setShowList] = useState(false);
+
+  const fetchUnreadCount = async () => {
+    if (!token) return;
+
+    const res = await fetch("http://localhost:8080/notifications/unread-count", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+    setUnreadCount(data.count || 0);
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchUnreadCount();
+    }
+  }, [isAuthenticated, token]);
+
+  const toggleNotifications = async () => {
+    setShowList(prev => !prev);
+
+    if (!showList) {
+      await fetch("http://localhost:8080/notifications/read-all", {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setUnreadCount(0);
+    }
+  };
 
   function renderLinksByRole(role) {
     switch(role) {
@@ -92,7 +131,8 @@ export default function Layout() {
                 <span className="navbar-text me-3">
                 {user?.firstName} {user?.lastName}
                 </span>
-                
+              
+              <NotificationBell count={unreadCount} onClick={toggleNotifications} />
               <Link to="/consultation_list" className="nav-link" aria-label="Consultations" > <i className="bi bi-cart"></i> </Link>
 
               <button
@@ -135,6 +175,9 @@ export default function Layout() {
       <nav className="navbar navbar-expand navbar-light bg-light px-3">
        { isAuthenticated ? renderLinksByRole(role) : renderLinksByRole('GUEST') }
       </nav>
+
+      {showList && <NotificationsList show={showList}/>}
+
 
       <main className="container mt-3">
         <Outlet />

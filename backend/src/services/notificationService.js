@@ -1,10 +1,9 @@
 const Notification = require("../models/NotificationModel");
-const WebSocket = require("ws");
 
-let wss = null; 
+let io = null;
 
-exports.setWebSocketServer = (webSocketServer) => {
-  wss = webSocketServer;
+exports.setSocketServer = (socketServer) => {
+  io = socketServer;
 };
 
 exports.getAllNotificationsForUser = async (userId) => {
@@ -40,20 +39,13 @@ exports.createNotification = async (notification) => {
 };
 
 exports.broadcastNotification = (notification) => {
-  if (!wss) {
-    console.warn("Brak serwera WebSocket - nie można rozesłać powiadomienia");
+  if (!io) {
+    console.warn("Brak serwera Socket.IO - nie można rozesłać powiadomienia");
     return;
   }
 
-  const message = JSON.stringify(notification);
+  const userIdStr = notification.userId.toString();
+  console.log("Broadcast to userId:", userIdStr);
 
-  try {
-    wss.clients.forEach(client => {
-      if (client.readyState === WebSocket.OPEN && client.userId === notification.userId) {
-        client.send(message);
-      }
-    });
-  } catch (err) {
-    console.error("Błąd podczas broadcastowania powiadomienia:", err);
-  }
+  io.to(userIdStr).emit("notification", notification);
 };

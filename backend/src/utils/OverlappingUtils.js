@@ -1,5 +1,6 @@
 const Availability = require('../models/AvailabilityModel'); 
 const Appointment = require('../models/AppointmentModel'); 
+const Absence = require('../models/AbsenceModel'); 
 const notificationService = require('../services/NotificationService')
 
 async function adjustOverlappingAvailabilities(doctor_id, newDateFrom, newDateTo) {
@@ -86,7 +87,49 @@ async function removeAppointmentsDuringAbsence(doctorId, dateFrom, dateTo) {
   return result.deletedCount; 
 }
 
+const toDateTime = (date, time) => {
+  const [hours, minutes] = time.split(":").map(Number);
+  const d = new Date(date);
+  d.setHours(hours, minutes, 0, 0);
+  return d;
+};
+
+async function canAppointmentBeSaved({doctorId, date, time, duration = 30,}) {
+  const start = toDateTime(date, time);
+  const end = new Date(start.getTime() + duration * 60000);
+
+  const absence = await Absence.exists({
+    doctor_id: doctorId,
+    date_from: { $lt: end },
+    date_to: { $gt: start },
+  });
+
+  if (absence) {
+    return false;
+  }
+
+  const appointments = await Appointment.find({
+    doctor_id: doctorId,
+    date,
+  }).select("time duration");
+
+  for (const appt of appointments) {
+    const apptStart = toDateTime(date, appt.time);
+    const apptEnd = new Date(
+      apptStart.getTime() + appt.duration * 60000
+    );
+
+    const overlaps = start < apptEnd && end > apptStart;
+    if (overlaps) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 module.exports = {
   adjustOverlappingAvailabilities,
-  removeAppointmentsDuringAbsence
+  removeAppointmentsDuringAbsence,
+  canAppointmentBeSaved
 };

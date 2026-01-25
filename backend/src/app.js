@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
+const { createSocketServer } = require("./socket");
 
 const availabilityRoutes = require("./routes/AvailabilityRouter");
 const absenceRoutes = require("./routes/AbsenceRouter");
@@ -12,7 +13,6 @@ const ratingRouter =  require("./routes/RatingRouter")
 const notificationsRouter = require("./routes/NotificationsRouter"); 
 
 const connectDB = require("./db");
-const { createWebSocketServer } = require("./ws");
 const notificationService = require("./services/NotificationService");
 
 const app = express();
@@ -33,12 +33,10 @@ app.use("/ratings", ratingRouter);
 app.use("/notifications", notificationsRouter);
 
 const server = http.createServer(app);
-createWebSocketServer(server);
+
+const io = createSocketServer(server);
+notificationService.setSocketServer(io);
 
 const PORT = process.env.PORT || 8080; 
 server.listen(PORT, () =>{
 console.log(`Server is running on port ${PORT}.`); })
-
-const listEndpoints = require("express-list-endpoints");
-
-console.log(listEndpoints(app));

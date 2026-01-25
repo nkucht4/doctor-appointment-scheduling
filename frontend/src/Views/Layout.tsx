@@ -3,185 +3,196 @@ import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../Providers/AuthProvider";
 import NotificationBell from "../Notifications/NotificationBell";
 import { NotificationsList } from "../Notifications/NotificationsList";
+import notificationObservable from "../Notifications/NotificationObservable";
 
 export default function Layout() {
-  const { isAuthenticated, logout, user, token } = useContext(AuthContext);
-  const role = user?.role || 'GUEST';
-  
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [showList, setShowList] = useState(false);
+	const { isAuthenticated, logout, user, token } = useContext(AuthContext);
+	const role = user?.role || 'GUEST';
+	
+	const [unreadCount, setUnreadCount] = useState(0);
+	const [showList, setShowList] = useState(false);
 
-  const fetchUnreadCount = async () => {
-    if (!token) return;
+	const fetchUnreadCount = async () => {
+		if (!token) return;
 
-    const res = await fetch("http://localhost:8080/notifications/unread-count", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+		const res = await fetch("http://localhost:8080/notifications/unread-count", {
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		});
 
-    const data = await res.json();
-    setUnreadCount(data.count || 0);
-  };
+		const data = await res.json();
+		setUnreadCount(data.count || 0);
+	};
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchUnreadCount();
-    }
-  }, [isAuthenticated, token]);
+	useEffect(() => {
+        if (isAuthenticated) {
+        fetchUnreadCount();
+        notificationObservable.connect(token);
 
-  const toggleNotifications = async () => {
-    setShowList(prev => !prev);
+        const unsubscribe = notificationObservable.subscribe((notification) => {
+            setUnreadCount((count) => count + 1);
+        });
 
-    if (!showList) {
-      await fetch("http://localhost:8080/notifications/read-all", {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+        return () => {
+            unsubscribe();
+            notificationObservable.disconnect();
+        };
+        }
+    }, [isAuthenticated, token]);
 
-      setUnreadCount(0);
-    }
-  };
+	const toggleNotifications = async () => {
+		setShowList(prev => !prev);
 
-  function renderLinksByRole(role) {
-    switch(role) {
-      case 'ADMIN':
-        return (
-          <>
-             <Link className="navbar-brand" to="/">
-          Doctor Calendar
-        </Link>
+		if (!showList) {
+			await fetch("http://localhost:8080/notifications/read-all", {
+				method: "PATCH",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
 
-            <Link className="navbar-brand" to="/admin_panel">
-              Panel Admina
-            </Link>
+			setUnreadCount(0);
+		}
+	};
 
-            <Link className="navbar-brand" to="/doctors_harmonogram">
-              Harmonogram lekarzy
-            </Link>
+	function renderLinksByRole(role) {
+		switch(role) {
+			case 'ADMIN':
+				return (
+					<>
+						 <Link className="navbar-brand" to="/">
+					Doctor Calendar
+				</Link>
 
-                    <div className="ms-auto d-flex gap-3 align-items-center">
-            <>
+						<Link className="navbar-brand" to="/admin_panel">
+							Panel Admina
+						</Link>
 
-                <span className="navbar-text me-3">
-                {user?.firstName} {user?.lastName}
-                </span>
-              
+						<Link className="navbar-brand" to="/doctors_harmonogram">
+							Harmonogram lekarzy
+						</Link>
 
-              <button
-                className="btn btn-outline-secondary btn-sm"
-                onClick={logout}
-              >
-                Wyloguj
-              </button>
-            </>
-        </div>
+										<div className="ms-auto d-flex gap-3 align-items-center">
+						<>
 
-          </>
-        );
-      case 'DOCTOR':
-        return (
-          <>
-            <Link className="navbar-brand" to="/">
-          Doctor Calendar
-        </Link>
+								<span className="navbar-text me-3">
+								{user?.firstName} {user?.lastName}
+								</span>
+							
 
-            <Link className="navbar-brand" to={`/calendar/doctor/${user?.id}`}>
-              Mój harmonogram
-            </Link>
+							<button
+								className="btn btn-outline-secondary btn-sm"
+								onClick={logout}
+							>
+								Wyloguj
+							</button>
+						</>
+				</div>
 
-            <Link className="navbar-brand" to={`/doctor/${user?.id}/reviews`}>
-              Moje opinie
-            </Link>
+					</>
+				);
+			case 'DOCTOR':
+				return (
+					<>
+						<Link className="navbar-brand" to="/">
+					Doctor Calendar
+				</Link>
 
-        <div className="ms-auto d-flex gap-3 align-items-center">
-            <>
+						<Link className="navbar-brand" to={`/calendar/doctor/${user?.id}`}>
+							Mój harmonogram
+						</Link>
 
-                <span className="navbar-text me-3">
-                {user?.firstName} {user?.lastName}
-                </span>
-                
-              <button
-                className="btn btn-outline-secondary btn-sm"
-                onClick={logout}
-              >
-                Wyloguj
-              </button>
-            </>
-        </div>
-          </>
-        );
-      case 'PATIENT':
-        return (
-          <>
-            <Link className="navbar-brand" to="/">
-          Doctor Calendar
-        </Link>
+						<Link className="navbar-brand" to={`/doctor/${user?.id}/reviews`}>
+							Moje opinie
+						</Link>
 
+				<div className="ms-auto d-flex gap-3 align-items-center">
+						<>
 
-            <Link className="navbar-brand" to="/doctors_harmonogram">
-              Harmonogramy lekarzy
-            </Link>
-
-        <div className="ms-auto d-flex gap-3 align-items-center">
-            <>
-
-                <span className="navbar-text me-3">
-                {user?.firstName} {user?.lastName}
-                </span>
-              
-              <NotificationBell count={unreadCount} onClick={toggleNotifications} />
-              <Link to="/consultation_list" className="nav-link" aria-label="Consultations" > <i className="bi bi-cart"></i> </Link>
-
-              <button
-                className="btn btn-outline-secondary btn-sm"
-                onClick={logout}
-              >
-                Wyloguj
-              </button>
-            </>
-        </div>
-          </>
-        );
-      default: 
-        return (
-          <>
-            <Link className="navbar-brand" to="/">
-              Doctor Calendar
-            </Link>
-
-            <Link className="navbar-brand" to="/doctors">
-              Lista lekarzy
-            </Link>
-
-          <div className="ms-auto d-flex gap-3 align-items-center">
-                <Link to="/login" className="nav-link">
-                  Logowanie
-                </Link>
-                <Link to="/register" className="nav-link">
-                  Rejestracja
-                </Link>
-          </div>
-          </>
-        );
-    }
-  }
+								<span className="navbar-text me-3">
+								{user?.firstName} {user?.lastName}
+								</span>
+								
+							<button
+								className="btn btn-outline-secondary btn-sm"
+								onClick={logout}
+							>
+								Wyloguj
+							</button>
+						</>
+				</div>
+					</>
+				);
+			case 'PATIENT':
+				return (
+					<>
+						<Link className="navbar-brand" to="/">
+					Doctor Calendar
+				</Link>
 
 
-  return (
-    <>
-      <nav className="navbar navbar-expand navbar-light bg-light px-3">
-       { isAuthenticated ? renderLinksByRole(role) : renderLinksByRole('GUEST') }
-      </nav>
+						<Link className="navbar-brand" to="/doctors_harmonogram">
+							Harmonogramy lekarzy
+						</Link>
 
-      {showList && <NotificationsList show={showList}/>}
+				<div className="ms-auto d-flex gap-3 align-items-center">
+						<>
+
+								<span className="navbar-text me-3">
+								{user?.firstName} {user?.lastName}
+								</span>
+							
+							<NotificationBell count={unreadCount} onClick={toggleNotifications} />
+							<Link to="/consultation_list" className="nav-link" aria-label="Consultations" > <i className="bi bi-cart"></i> </Link>
+
+							<button
+								className="btn btn-outline-secondary btn-sm"
+								onClick={logout}
+							>
+								Wyloguj
+							</button>
+						</>
+				</div>
+					</>
+				);
+			default: 
+				return (
+					<>
+						<Link className="navbar-brand" to="/">
+							Doctor Calendar
+						</Link>
+
+						<Link className="navbar-brand" to="/doctors">
+							Lista lekarzy
+						</Link>
+
+					<div className="ms-auto d-flex gap-3 align-items-center">
+								<Link to="/login" className="nav-link">
+									Logowanie
+								</Link>
+								<Link to="/register" className="nav-link">
+									Rejestracja
+								</Link>
+					</div>
+					</>
+				);
+		}
+	}
 
 
-      <main className="container mt-3">
-        <Outlet />
-      </main>
-    </>
-  );
+	return (
+		<>
+			<nav className="navbar navbar-expand navbar-light bg-light px-3">
+			 { isAuthenticated ? renderLinksByRole(role) : renderLinksByRole('GUEST') }
+			</nav>
+
+			{showList && <NotificationsList show={showList}/>}
+
+
+			<main className="container mt-3">
+				<Outlet />
+			</main>
+		</>
+	);
 }

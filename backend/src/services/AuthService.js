@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require("../models/UserModel");
 
-const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
+const JWT_SECRET = process.env.JWT_SECRET || "doctor_app_jwt";
 const ACCESS_TOKEN_TTL = "1d";
 
 async function registerUser({ firstName, lastName, email, password }) {

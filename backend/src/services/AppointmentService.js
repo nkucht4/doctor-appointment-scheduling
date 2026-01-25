@@ -1,5 +1,6 @@
 const Appointment = require("../models/AppointmentModel");
 const notificationService = require("./NotificationService");
+const { canAppointmentBeSaved } = require("../utils/OverlappingUtils")
 
 const LIMITED_APPOINTMENT_FIELDS = {
   date: 1,
@@ -8,6 +9,17 @@ const LIMITED_APPOINTMENT_FIELDS = {
 };
 
 const createAppointment = async (appointmentData, fileBuffer, fileMimetype) => {
+  const canBeSaved = await canAppointmentBeSaved({
+    doctorId: appointmentData.doctor_id,
+    date: appointmentData.date,
+    time: appointmentData.time,
+    duration: appointmentData.duration,
+  });
+
+  if (!canBeSaved) {
+    return null;
+  }
+
   if (fileBuffer && fileMimetype) {
     appointmentData.file = {
       data: fileBuffer,
@@ -106,11 +118,13 @@ const deleteAppointment = async (id, user) => {
     throw error;
   }
 
-  await notificationService.createNotification({
+  const savedNotification = await notificationService.createNotification({
     userId: appointment.patient_id,
     message: `Wizyta została anulowana (${new Date(appointment.date).toLocaleString()})`,
     date: new Date(),
   });
+
+  notificationService.broadcastNotification(savedNotification);
 
   return appointment;
 };

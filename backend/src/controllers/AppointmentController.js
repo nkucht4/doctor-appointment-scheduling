@@ -12,6 +12,12 @@ exports.createAppointment = async (req, res) => {
       req.file?.mimetype
     );
 
+    if (!appointment) {
+      return res.status(409).json({
+        message: "Doctor is not available at this time",
+      });
+    }
+
     res.status(201).json({ message: "Appointment created", appointment });
   } catch (error) {
     res.status(500).json({ message: "Error creating appointment", error: error.message });

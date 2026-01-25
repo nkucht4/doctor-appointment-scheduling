@@ -10,6 +10,7 @@ export default function ConsultationForm(props) {
     const [ appointmentsToday, setAppointmentsToday ] = useState([]);
     const [ available, setAvailable ] = useState([]);
     const { token } = useContext(AuthContext);
+    const [submitError, setSubmitError] = useState(null);
 
     useEffect(()=>{
         setAppointmentsToday(getAppointmentsForDay(props.selectedSlot.date));
@@ -98,6 +99,7 @@ export default function ConsultationForm(props) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSubmitError(null);
         if (!validate()) return;
         //saveAppointment(form);
         try {
@@ -118,12 +120,15 @@ export default function ConsultationForm(props) {
             });
 
             if (!response.ok) {
-            throw new Error(`Server error: ${response.statusText}`);
+                const data = await response.json();
+                throw new Error("Nie udało się zapisać wizyty");
+            }
+            else {
+                props.onClose();
             }
         } catch (error) {
-            console.error("Error:", error.message);
+            setSubmitError(true);
         }
-        props.onClose();
         setEditFlag(p=>!p);
     };
 
@@ -223,6 +228,12 @@ export default function ConsultationForm(props) {
                     onChange={handleChange}
                 />
             </div>
+
+            {submitError && (
+            <div className="alert alert-danger">
+                Nie udało się zapisać wizyty
+            </div>
+            )}
 
             <button type="submit" className="btn btn-primary">
                 Wyślij

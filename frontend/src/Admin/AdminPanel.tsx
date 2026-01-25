@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import UserList from "./UserList";
 import AddDoctorForm from "./AddDoctorForm";
 import { AuthContext } from "../Providers/AuthProvider";
+import PersistenceSelector from "./PersistenceSelector";
 
 export default function AdminPanel() {
   const [allUsers, setAllUsers] = useState([]);
@@ -76,6 +77,10 @@ export default function AdminPanel() {
 
       <h3 className="mt-4">Pacjenci</h3>
       <UserList users={patients} fetchUsers={()=>{setChange(p=>!p)}}/>
+
+
+      <h3 className="mt-4">Tryb perzystencji</h3>
+      <PersistenceSelector/>
     </div>
   );
 }

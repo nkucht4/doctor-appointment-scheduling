@@ -1,6 +1,6 @@
 const WebSocket = require("ws");
 const jwt = require("jsonwebtoken");
-const notificationService = require("./services/notificationService");
+const notificationService = require("./services/NotificationService");
 
 const SECRET_KEY = process.env.JWT_SECRET || "twoj_secret";
 

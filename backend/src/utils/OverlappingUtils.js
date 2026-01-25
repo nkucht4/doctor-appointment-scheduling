@@ -1,6 +1,6 @@
 const Availability = require('../models/AvailabilityModel'); 
 const Appointment = require('../models/AppointmentModel'); 
-const notificationService = require('../services/notificationService')
+const notificationService = require('../services/NotificationService')
 
 async function adjustOverlappingAvailabilities(doctor_id, newDateFrom, newDateTo) {
   const overlaps = await Availability.find({

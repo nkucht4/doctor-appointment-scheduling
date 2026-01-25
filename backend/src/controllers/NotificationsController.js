@@ -1,4 +1,4 @@
-const notificationService = require("../services/notificationService");
+const notificationService = require("../services/NotificationService");
 
 exports.getNotifications = async (req, res) => {
   const userId = req.user.id;

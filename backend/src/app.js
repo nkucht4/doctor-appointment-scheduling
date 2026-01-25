@@ -13,7 +13,7 @@ const notificationsRouter = require("./routes/NotificationsRouter");
 
 const connectDB = require("./db");
 const { createWebSocketServer } = require("./ws");
-const notificationService = require("./services/notificationService");
+const notificationService = require("./services/NotificationService");
 
 const app = express();
 var corsOptions = { origin: "http://localhost:5173" };

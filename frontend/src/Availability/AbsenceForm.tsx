@@ -5,10 +5,12 @@ import ModeForm from "./ModeForm";
 import { saveAbsence } from "../consultationServices";
 import { AvailabilityContext } from "../Providers/AvailabilityProvider";
 import { AuthContext } from "../Providers/AuthProvider";
+import { AppointmentContext } from "../Providers/AppointmentProvider";
 
 export default function AbsenceForm(){
     const [mode, setMode] = useState("cyclic");
-    const { setEditFlag } = useContext(AvailabilityContext);
+    const { setEditFlag2 } = useContext(AvailabilityContext);
+    const { setEditFlag } = useContext(AppointmentContext);
     const [dateRange, setDateRange] = useState({ from: "", to: "" });
     const [singleDate, setSingleDate] = useState("");
     const { token } = useContext(AuthContext);
@@ -41,6 +43,7 @@ export default function AbsenceForm(){
             }
 
             setEditFlag(p=>!p);
+            setEditFlag2(p=>!p);
     }
 
     return (

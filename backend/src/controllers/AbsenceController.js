@@ -1,4 +1,5 @@
 const Absence = require("../models/AbsenceModel");
+const { removeAppointmentsDuringAbsence } = require("../utils/OverlappingUtils")
 
 exports.createAbsence = async (req, res) => {
   try {
@@ -12,6 +13,9 @@ exports.createAbsence = async (req, res) => {
     else {
       return res.status(403).json({ message: "Forbidden" });
     }
+
+    const removedCount = await removeAppointmentsDuringAbsence(doctorId, date_from, date_to);
+    
     const absence = new Absence({
       doctor_id: doctorId,
       date_from,

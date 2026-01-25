@@ -1,4 +1,5 @@
 const Availability = require("../models/AvailabilityModel");
+const { adjustOverlappingAvailabilities } = require("../utils/OverlappingUtils");
 
 exports.createAvailability = async (req, res) => {
   try {
@@ -16,6 +17,10 @@ exports.createAvailability = async (req, res) => {
     } else {
       return res.status(403).json({ message: "Forbidden" });
     }
+
+    const newDateFrom = new Date(date_from);
+    const newDateTo = new Date(date_to);
+    await adjustOverlappingAvailabilities(assignedDoctorId, newDateFrom, newDateTo);
 
     const availability = new Availability({
       doctor_id: assignedDoctorId,

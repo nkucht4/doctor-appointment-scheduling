@@ -104,6 +104,10 @@ cd ../frontend
 npm run dev
 ```
 
+## Documentation
+
+- [Backend API Documentation](docs/backend.md)
+
 ## Screenshots
 ### Patient View
 ![Patient View](docs/screenshots/screen_1.png)
